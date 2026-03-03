@@ -3,6 +3,7 @@ import { Title, Text, Select, Group } from '@mantine/core';
 import { NOTE_NAMES } from '../../models/music';
 import { getCommonScaleTypes } from '../../services/scales';
 import { useScale } from '../../hooks/useScale';
+import { FretboardDiagram } from '../../components/fretboard';
 
 interface ScaleExplorerProps {
   tuning: string[];
@@ -55,11 +56,15 @@ export function ScaleExplorer({ tuning, fretCount }: ScaleExplorerProps) {
       <Text size="sm" c="dimmed" mb="md">
         Notes: {notes.join(' – ')}
       </Text>
-      <Text size="sm" c="dimmed">
-        {highlightedPositions.length} positions on the fretboard
-      </Text>
-
-      {/* TODO: Fretboard SVG diagram will go here */}
+      <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
+        <FretboardDiagram
+          tuning={tuning}
+          fretCount={fretCount}
+          highlightedPositions={highlightedPositions}
+          root={rootNote}
+          showNoteNames
+        />
+      </div>
     </div>
   );
 }

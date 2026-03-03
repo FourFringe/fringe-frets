@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Title, Text, Select, Group } from '@mantine/core';
 import { NOTE_NAMES } from '../../models/music';
 import { getCommonChordTypes, getChord, getChordNotes } from '../../services/chords';
+import { buildFretboard, filterByPitchClasses } from '../../services/fretboard';
+import { FretboardDiagram } from '../../components/fretboard';
 
 interface ChordBuilderProps {
   tuning: string[];
@@ -15,12 +17,18 @@ const chordOptions = Object.entries(commonChords).flatMap(([group, types]) =>
 
 const noteOptions = NOTE_NAMES.map((n) => ({ value: n, label: n }));
 
-export function ChordBuilder({ tuning: _tuning, fretCount: _fretCount }: ChordBuilderProps) {
+export function ChordBuilder({ tuning, fretCount }: ChordBuilderProps) {
   const [rootNote, setRootNote] = useState('C');
   const [chordType, setChordType] = useState('major');
 
   const chord = getChord(rootNote, chordType);
   const notes = getChordNotes(rootNote, chordType);
+
+  const highlightedPositions = useMemo(() => {
+    if (notes.length === 0) return [];
+    const fretboard = buildFretboard(tuning, fretCount);
+    return filterByPitchClasses(fretboard, notes);
+  }, [rootNote, chordType, tuning, fretCount, notes]);
 
   return (
     <div>
@@ -56,12 +64,20 @@ export function ChordBuilder({ tuning: _tuning, fretCount: _fretCount }: ChordBu
         Notes: {notes.join(' – ')}
       </Text>
       {chord?.intervals && (
-        <Text size="sm" c="dimmed">
+        <Text size="sm" c="dimmed" mb="md">
           Intervals: {chord.intervals.join(' – ')}
         </Text>
       )}
 
-      {/* TODO: Chord voicing diagram will go here */}
+      <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
+        <FretboardDiagram
+          tuning={tuning}
+          fretCount={fretCount}
+          highlightedPositions={highlightedPositions}
+          root={rootNote}
+          showNoteNames
+        />
+      </div>
     </div>
   );
 }
