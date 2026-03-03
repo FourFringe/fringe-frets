@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router';
 import { Select } from '@mantine/core';
+import { Note } from 'tonal';
 import { INSTRUMENTS } from '../../models/instrument';
 import type { UserSettings } from '../../models/settings';
 import styles from './AppShell.module.css';
@@ -78,6 +79,15 @@ export function AppShell({ settings, onUpdateSettings }: AppShellProps) {
           onChange={handleInstrumentChange}
           size="sm"
         />
+
+        <div className={styles.tuningDisplay}>
+          <span className={styles.tuningLabel}>Tuning</span>
+          <span className={styles.tuningNotes}>
+            {(settings.tuning ?? INSTRUMENTS[settings.instrumentId]?.defaultTuning ?? [])
+              .map((n) => Note.pitchClass(n) || n)
+              .join(' ')}
+          </span>
+        </div>
       </nav>
 
       <main className={styles.main}>

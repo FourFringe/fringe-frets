@@ -39,7 +39,13 @@ export function FretboardDots({
         const cx = fretCenterX(displayFret);
         const cy = stringY(pos.string);
         const isRoot = root !== undefined && pos.note === root;
+        const isOpen = displayFret === 0;
         const r = isRoot ? ROOT_DOT_RADIUS : DOT_RADIUS;
+
+        const rootColor = 'var(--fb-root, #e03131)';
+        const rootStroke = 'var(--fb-root-stroke, #c92a2a)';
+        const dotColor = 'var(--fb-dot, #228be6)';
+        const dotStroke = 'var(--fb-dot-stroke, #1971c2)';
 
         let label: string | null = null;
         if (labelMode === 'note') {
@@ -48,14 +54,44 @@ export function FretboardDots({
           label = intervalMap[pos.note] ?? pos.note;
         }
 
+        // Open-string dots are rendered as hollow (outline) circles
+        if (isOpen) {
+          return (
+            <g key={`dot-${pos.string}-${pos.fret}`} data-open="true">
+              <circle
+                cx={cx}
+                cy={cy}
+                r={r}
+                fill="none"
+                stroke={isRoot ? rootColor : dotColor}
+                strokeWidth={2}
+              />
+              {label && (
+                <text
+                  x={cx}
+                  y={cy}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize={isRoot ? 11 : 10}
+                  fontWeight={isRoot ? 700 : 500}
+                  fill={isRoot ? rootColor : dotColor}
+                  style={{ pointerEvents: 'none', userSelect: 'none' }}
+                >
+                  {label}
+                </text>
+              )}
+            </g>
+          );
+        }
+
         return (
           <g key={`dot-${pos.string}-${pos.fret}`}>
             <circle
               cx={cx}
               cy={cy}
               r={r}
-              fill={isRoot ? 'var(--fb-root, #e03131)' : 'var(--fb-dot, #228be6)'}
-              stroke={isRoot ? 'var(--fb-root-stroke, #c92a2a)' : 'var(--fb-dot-stroke, #1971c2)'}
+              fill={isRoot ? rootColor : dotColor}
+              stroke={isRoot ? rootStroke : dotStroke}
               strokeWidth={1.5}
             />
             {label && (

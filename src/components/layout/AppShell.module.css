@@ -70,6 +70,26 @@
   margin: 1rem 0;
 }
 
+.tuningDisplay {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tuningLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--mantine-color-dark-2, #909296);
+}
+
+.tuningNotes {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--mantine-color-dark-0, #c1c2c5);
+}
+
 /* Print styles: hide sidebar and chrome */
 @media print {
   .sidebar {

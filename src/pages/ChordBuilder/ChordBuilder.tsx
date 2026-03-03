@@ -12,9 +12,10 @@ interface ChordBuilderProps {
 }
 
 const commonChords = getCommonChordTypes();
-const chordOptions = Object.entries(commonChords).flatMap(([group, types]) =>
-  types.map((t) => ({ value: t, label: t, group })),
-);
+const chordOptions = Object.entries(commonChords).map(([group, types]) => ({
+  group,
+  items: types.map((t) => ({ value: t, label: t })),
+}));
 
 const noteOptions = NOTE_NAMES.map((n) => ({ value: n, label: n }));
 

@@ -12,9 +12,10 @@ interface ScaleExplorerProps {
 }
 
 const commonScales = getCommonScaleTypes();
-const scaleOptions = Object.entries(commonScales).flatMap(([group, types]) =>
-  types.map((t) => ({ value: t, label: t, group })),
-);
+const scaleOptions = Object.entries(commonScales).map(([group, types]) => ({
+  group,
+  items: types.map((t) => ({ value: t, label: t })),
+}));
 
 const noteOptions = NOTE_NAMES.map((n) => ({ value: n, label: n }));
 

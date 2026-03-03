@@ -146,9 +146,6 @@ describe('FretboardDiagram', () => {
   it('works with a 4-string instrument (ukulele)', () => {
     const ukeTuning = ['G4', 'C4', 'E4', 'A4'];
     render(<FretboardDiagram tuning={ukeTuning} fretCount={5} />);
-    const grid = screen.getByTestId('fretboard-grid');
-    // 4 strings
-    const strings = grid.querySelectorAll('line[data-testid]') ?? [];
     const svg = screen.getByTestId('fretboard-diagram');
     expect(svg).toBeTruthy();
     // Check string labels exist
@@ -156,5 +153,65 @@ describe('FretboardDiagram', () => {
     expect(labels.textContent).toContain('G');
     expect(labels.textContent).toContain('C');
     expect(labels.textContent).toContain('A');
+  });
+
+  it('renders open-string (fret 0) dots as hollow circles', () => {
+    const positions: FretPosition[] = [
+      { string: 0, fret: 0, note: 'E', octave: 2, midi: 40 },
+      { string: 0, fret: 3, note: 'G', octave: 2, midi: 43 },
+    ];
+    render(
+      <FretboardDiagram
+        tuning={GUITAR_TUNING}
+        fretCount={5}
+        highlightedPositions={positions}
+        labelMode="note"
+      />,
+    );
+    const dots = screen.getByTestId('fretboard-dots');
+    const groups = dots.querySelectorAll('g[data-open="true"]');
+    // One fret-0 position should be rendered as open
+    expect(groups.length).toBe(1);
+    const openCircle = groups[0].querySelector('circle');
+    // Open-string dots have fill="none" (hollow)
+    expect(openCircle?.getAttribute('fill')).toBe('none');
+  });
+
+  it('renders fretted dots as filled circles', () => {
+    const positions: FretPosition[] = [
+      { string: 0, fret: 3, note: 'G', octave: 2, midi: 43 },
+    ];
+    render(
+      <FretboardDiagram
+        tuning={GUITAR_TUNING}
+        fretCount={5}
+        highlightedPositions={positions}
+        labelMode="note"
+      />,
+    );
+    const dots = screen.getByTestId('fretboard-dots');
+    const openGroups = dots.querySelectorAll('g[data-open="true"]');
+    expect(openGroups.length).toBe(0);
+    // The fretted dot should have a filled circle
+    const circle = dots.querySelector('circle');
+    expect(circle?.getAttribute('fill')).not.toBe('none');
+  });
+
+  it('open-string dot labels use colored text (not white)', () => {
+    const positions: FretPosition[] = [
+      { string: 0, fret: 0, note: 'E', octave: 2, midi: 40 },
+    ];
+    render(
+      <FretboardDiagram
+        tuning={GUITAR_TUNING}
+        fretCount={5}
+        highlightedPositions={positions}
+        labelMode="note"
+      />,
+    );
+    const dots = screen.getByTestId('fretboard-dots');
+    const textEl = dots.querySelector('text');
+    // Open-string label should NOT be white (since circle is hollow)
+    expect(textEl?.getAttribute('fill')).not.toBe('white');
   });
 });

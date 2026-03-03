@@ -1,6 +1,44 @@
+import { useNavigate } from 'react-router';
 import { Title, Text, SimpleGrid, Card, ThemeIcon } from '@mantine/core';
 
+const features = [
+  {
+    title: 'Scale Explorer',
+    description:
+      'Visualize any scale on the fretboard. See note positions, intervals, and patterns across all strings.',
+    icon: '🎵',
+    color: 'blue',
+    path: '/scales',
+  },
+  {
+    title: 'Chord Builder',
+    description:
+      'Build and explore chord voicings. See how chords are constructed and find fingering positions on the fretboard.',
+    icon: '🎸',
+    color: 'violet',
+    path: '/chords',
+  },
+  {
+    title: 'Tab Viewer',
+    description:
+      'View and print tablature with fretboard diagrams. Create printable music sheets for practice.',
+    icon: '📄',
+    color: 'teal',
+    path: '/tabs',
+  },
+  {
+    title: 'Multi-Instrument',
+    description:
+      'Switch between guitar, mandolin, ukulele, violin, and cello. All tools adapt to the selected instrument.',
+    icon: '🎻',
+    color: 'orange',
+    path: null,
+  },
+] as const;
+
 export function Home() {
+  const navigate = useNavigate();
+
   return (
     <div>
       <Title order={1} mb="xs">
@@ -11,57 +49,26 @@ export function Home() {
       </Text>
 
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-        <Card padding="lg" radius="md" withBorder>
-          <ThemeIcon size="xl" radius="md" variant="light" color="blue" mb="sm">
-            🎵
-          </ThemeIcon>
-          <Title order={3} mb="xs">
-            Scale Explorer
-          </Title>
-          <Text size="sm" c="dimmed">
-            Visualize any scale on the fretboard. See note positions, intervals, and patterns across
-            all strings.
-          </Text>
-        </Card>
-
-        <Card padding="lg" radius="md" withBorder>
-          <ThemeIcon size="xl" radius="md" variant="light" color="violet" mb="sm">
-            🎸
-          </ThemeIcon>
-          <Title order={3} mb="xs">
-            Chord Builder
-          </Title>
-          <Text size="sm" c="dimmed">
-            Build and explore chord voicings. See how chords are constructed and find fingering
-            positions on the fretboard.
-          </Text>
-        </Card>
-
-        <Card padding="lg" radius="md" withBorder>
-          <ThemeIcon size="xl" radius="md" variant="light" color="teal" mb="sm">
-            📄
-          </ThemeIcon>
-          <Title order={3} mb="xs">
-            Tab Viewer
-          </Title>
-          <Text size="sm" c="dimmed">
-            View and print tablature with fretboard diagrams. Create printable music sheets for
-            practice.
-          </Text>
-        </Card>
-
-        <Card padding="lg" radius="md" withBorder>
-          <ThemeIcon size="xl" radius="md" variant="light" color="orange" mb="sm">
-            🎻
-          </ThemeIcon>
-          <Title order={3} mb="xs">
-            Multi-Instrument
-          </Title>
-          <Text size="sm" c="dimmed">
-            Switch between guitar, mandolin, ukulele, violin, and cello. All tools adapt to the
-            selected instrument.
-          </Text>
-        </Card>
+        {features.map((feat) => (
+          <Card
+            key={feat.title}
+            padding="lg"
+            radius="md"
+            withBorder
+            style={feat.path ? { cursor: 'pointer' } : undefined}
+            onClick={feat.path ? () => navigate(feat.path!) : undefined}
+          >
+            <ThemeIcon size="xl" radius="md" variant="light" color={feat.color} mb="sm">
+              {feat.icon}
+            </ThemeIcon>
+            <Title order={3} mb="xs">
+              {feat.title}
+            </Title>
+            <Text size="sm" c="dimmed">
+              {feat.description}
+            </Text>
+          </Card>
+        ))}
       </SimpleGrid>
     </div>
   );
