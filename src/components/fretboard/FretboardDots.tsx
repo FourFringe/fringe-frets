@@ -1,13 +1,20 @@
 import { fretCenterX, stringY, DOT_RADIUS, ROOT_DOT_RADIUS } from './fretboardLayout';
 import type { FretPosition } from '../../models/music';
 
+export type DotLabelMode = 'note' | 'interval' | 'none';
+
 interface FretboardDotsProps {
   /** Positions to highlight on the fretboard. */
   positions: FretPosition[];
   /** The root note pitch class (e.g. "C") — gets a distinct color. */
   root?: string;
-  /** Whether to show note names inside the dots. */
-  showNoteNames: boolean;
+  /** What to display inside each dot. Defaults to 'note'. */
+  labelMode: DotLabelMode;
+  /**
+   * Map from pitch class to interval label (e.g. { C: 'R', E: '3', G: '5' }).
+   * Only used when labelMode is 'interval'.
+   */
+  intervalMap?: Record<string, string>;
   /** Starting fret of the visible window (used to offset x positions). */
   startFret: number;
 }
@@ -19,7 +26,8 @@ interface FretboardDotsProps {
 export function FretboardDots({
   positions,
   root,
-  showNoteNames,
+  labelMode,
+  intervalMap,
   startFret,
 }: FretboardDotsProps) {
   return (
@@ -33,6 +41,13 @@ export function FretboardDots({
         const isRoot = root !== undefined && pos.note === root;
         const r = isRoot ? ROOT_DOT_RADIUS : DOT_RADIUS;
 
+        let label: string | null = null;
+        if (labelMode === 'note') {
+          label = pos.note;
+        } else if (labelMode === 'interval' && intervalMap) {
+          label = intervalMap[pos.note] ?? pos.note;
+        }
+
         return (
           <g key={`dot-${pos.string}-${pos.fret}`}>
             <circle
@@ -43,7 +58,7 @@ export function FretboardDots({
               stroke={isRoot ? 'var(--fb-root-stroke, #c92a2a)' : 'var(--fb-dot-stroke, #1971c2)'}
               strokeWidth={1.5}
             />
-            {showNoteNames && (
+            {label && (
               <text
                 x={cx}
                 y={cy}
@@ -54,7 +69,7 @@ export function FretboardDots({
                 fill="white"
                 style={{ pointerEvents: 'none', userSelect: 'none' }}
               >
-                {pos.note}
+                {label}
               </text>
             )}
           </g>

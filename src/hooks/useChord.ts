@@ -1,42 +1,41 @@
 import { useMemo } from 'react';
-import { getScale } from '../services/scales';
+import { getChord, getChordNotes } from '../services/chords';
 import { buildIntervalMap } from '../services/intervals';
 import { buildFretboard, filterByPitchClasses } from '../services/fretboard';
 import type { FretPosition } from '../models/music';
+import type { ChordInfo } from '../services/chords';
 
-interface UseScaleResult {
+interface UseChordResult {
+  chord: ChordInfo | null;
   notes: string[];
-  scaleName: string | null;
   intervals: string[];
   intervalMap: Record<string, string>;
-  fretboard: FretPosition[][];
   highlightedPositions: FretPosition[];
 }
 
 /**
- * Hook that computes scale notes and their positions on the fretboard.
+ * Hook that computes chord notes and their positions on the fretboard.
  */
-export function useScale(
+export function useChord(
   root: string,
-  scaleType: string,
+  chordType: string,
   tuning: string[],
   fretCount: number,
-): UseScaleResult {
+): UseChordResult {
   return useMemo(() => {
-    const scaleInfo = getScale(root, scaleType);
-    const notes = scaleInfo ? scaleInfo.notes : [];
-    const intervals = scaleInfo ? scaleInfo.intervals : [];
+    const chord = getChord(root, chordType);
+    const notes = getChordNotes(root, chordType);
+    const intervals = chord ? chord.intervals : [];
     const intervalMap = notes.length > 0 ? buildIntervalMap(notes, intervals) : {};
     const fretboard = buildFretboard(tuning, fretCount);
     const highlightedPositions = notes.length > 0 ? filterByPitchClasses(fretboard, notes) : [];
 
     return {
+      chord,
       notes,
-      scaleName: scaleInfo?.name ?? null,
       intervals,
       intervalMap,
-      fretboard,
       highlightedPositions,
     };
-  }, [root, scaleType, tuning, fretCount]);
+  }, [root, chordType, tuning, fretCount]);
 }

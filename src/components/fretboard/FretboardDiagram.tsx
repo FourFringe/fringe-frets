@@ -1,4 +1,5 @@
 import type { FretPosition } from '../../models/music';
+import type { DotLabelMode } from './FretboardDots';
 import { svgWidth, svgHeight } from './fretboardLayout';
 import { FretboardGrid } from './FretboardGrid';
 import { FretboardDots } from './FretboardDots';
@@ -15,7 +16,16 @@ export interface FretboardDiagramProps {
   highlightedPositions?: FretPosition[];
   /** Root note pitch class for accent coloring (e.g. "C"). */
   root?: string;
-  /** Show note names inside highlighted dots. Defaults to true. */
+  /** What to display inside dots: note name, interval label, or nothing. Defaults to 'note'. */
+  labelMode?: DotLabelMode;
+  /**
+   * Map from pitch class to interval label (e.g. { C: 'R', E: '3', G: '5' }).
+   * Only used when labelMode is 'interval'.
+   */
+  intervalMap?: Record<string, string>;
+
+  // Legacy convenience prop — maps to labelMode internally
+  /** @deprecated Use labelMode instead. */
   showNoteNames?: boolean;
 }
 
@@ -34,8 +44,14 @@ export function FretboardDiagram({
   startFret = 0,
   highlightedPositions = [],
   root,
-  showNoteNames = true,
+  labelMode: labelModeProp,
+  intervalMap,
+  showNoteNames,
 }: FretboardDiagramProps) {
+  // Resolve labelMode: explicit prop wins, then legacy showNoteNames, then default 'note'
+  const labelMode: DotLabelMode =
+    labelModeProp ?? (showNoteNames === false ? 'none' : 'note');
+
   const stringCount = tuning.length;
   const width = svgWidth(fretCount);
   const height = svgHeight(stringCount);
@@ -59,7 +75,8 @@ export function FretboardDiagram({
       <FretboardDots
         positions={visiblePositions}
         root={root}
-        showNoteNames={showNoteNames}
+        labelMode={labelMode}
+        intervalMap={intervalMap}
         startFret={startFret}
       />
     </svg>

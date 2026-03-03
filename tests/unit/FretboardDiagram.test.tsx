@@ -49,14 +49,14 @@ describe('FretboardDiagram', () => {
         tuning={GUITAR_TUNING}
         fretCount={7}
         highlightedPositions={positions}
-        showNoteNames
+        labelMode="note"
       />,
     );
     const dots = screen.getByTestId('fretboard-dots');
     expect(dots.querySelectorAll('circle').length).toBe(2);
   });
 
-  it('shows note names inside dots when showNoteNames is true', () => {
+  it('shows note names inside dots when labelMode is note', () => {
     const positions: FretPosition[] = [
       { string: 0, fret: 3, note: 'G', octave: 2, midi: 43 },
     ];
@@ -65,14 +65,36 @@ describe('FretboardDiagram', () => {
         tuning={GUITAR_TUNING}
         fretCount={5}
         highlightedPositions={positions}
-        showNoteNames
+        labelMode="note"
       />,
     );
     const dots = screen.getByTestId('fretboard-dots');
     expect(dots.textContent).toContain('G');
   });
 
-  it('hides note names when showNoteNames is false', () => {
+  it('shows interval labels when labelMode is interval', () => {
+    const positions: FretPosition[] = [
+      { string: 0, fret: 3, note: 'G', octave: 2, midi: 43 },
+      { string: 0, fret: 5, note: 'A', octave: 2, midi: 45 },
+    ];
+    const intervalMap = { G: '5', A: '6' };
+    render(
+      <FretboardDiagram
+        tuning={GUITAR_TUNING}
+        fretCount={7}
+        highlightedPositions={positions}
+        labelMode="interval"
+        intervalMap={intervalMap}
+      />,
+    );
+    const dots = screen.getByTestId('fretboard-dots');
+    expect(dots.textContent).toContain('5');
+    expect(dots.textContent).toContain('6');
+    // Should NOT contain the note name
+    expect(dots.textContent).not.toContain('G');
+  });
+
+  it('hides labels when labelMode is none', () => {
     const positions: FretPosition[] = [
       { string: 0, fret: 3, note: 'G', octave: 2, midi: 43 },
     ];
@@ -81,11 +103,10 @@ describe('FretboardDiagram', () => {
         tuning={GUITAR_TUNING}
         fretCount={5}
         highlightedPositions={positions}
-        showNoteNames={false}
+        labelMode="none"
       />,
     );
     const dots = screen.getByTestId('fretboard-dots');
-    // Should have circles but no text
     expect(dots.querySelectorAll('circle').length).toBe(1);
     expect(dots.querySelectorAll('text').length).toBe(0);
   });

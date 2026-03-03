@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
-import { Title, Text, Select, Group } from '@mantine/core';
+import { useState } from 'react';
+import { Title, Text, Select, Group, SegmentedControl, Slider, Stack } from '@mantine/core';
 import { NOTE_NAMES } from '../../models/music';
-import { getCommonChordTypes, getChord, getChordNotes } from '../../services/chords';
-import { buildFretboard, filterByPitchClasses } from '../../services/fretboard';
+import { getCommonChordTypes } from '../../services/chords';
+import { useChord } from '../../hooks/useChord';
 import { FretboardDiagram } from '../../components/fretboard';
+import type { DotLabelMode } from '../../components/fretboard';
 
 interface ChordBuilderProps {
   tuning: string[];
@@ -20,15 +21,15 @@ const noteOptions = NOTE_NAMES.map((n) => ({ value: n, label: n }));
 export function ChordBuilder({ tuning, fretCount }: ChordBuilderProps) {
   const [rootNote, setRootNote] = useState('C');
   const [chordType, setChordType] = useState('major');
+  const [labelMode, setLabelMode] = useState<DotLabelMode>('note');
+  const [visibleFrets, setVisibleFrets] = useState(fretCount);
 
-  const chord = getChord(rootNote, chordType);
-  const notes = getChordNotes(rootNote, chordType);
-
-  const highlightedPositions = useMemo(() => {
-    if (notes.length === 0) return [];
-    const fretboard = buildFretboard(tuning, fretCount);
-    return filterByPitchClasses(fretboard, notes);
-  }, [rootNote, chordType, tuning, fretCount, notes]);
+  const { chord, notes, intervalMap, highlightedPositions } = useChord(
+    rootNote,
+    chordType,
+    tuning,
+    fretCount,
+  );
 
   return (
     <div>
@@ -39,7 +40,7 @@ export function ChordBuilder({ tuning, fretCount }: ChordBuilderProps) {
         Select a root note and chord type to see the chord tones and voicings.
       </Text>
 
-      <Group mb="xl">
+      <Group mb="lg">
         <Select
           label="Root Note"
           data={noteOptions}
@@ -55,27 +56,56 @@ export function ChordBuilder({ tuning, fretCount }: ChordBuilderProps) {
           searchable
           w={200}
         />
+        <Stack gap={4}>
+          <Text size="sm" fw={500}>
+            Dot Labels
+          </Text>
+          <SegmentedControl
+            value={labelMode}
+            onChange={(v) => setLabelMode(v as DotLabelMode)}
+            data={[
+              { label: 'Notes', value: 'note' },
+              { label: 'Intervals', value: 'interval' },
+              { label: 'None', value: 'none' },
+            ]}
+            size="xs"
+          />
+        </Stack>
       </Group>
 
-      <Title order={3} mb="sm">
+      <Title order={3} mb="xs">
         {chord?.symbol ?? `${rootNote} ${chordType}`}
       </Title>
       <Text size="sm" c="dimmed" mb="md">
-        Notes: {notes.join(' – ')}
+        Notes: {notes.join(' - ')}
       </Text>
       {chord?.intervals && (
         <Text size="sm" c="dimmed" mb="md">
-          Intervals: {chord.intervals.join(' – ')}
+          Intervals: {chord.intervals.join(' - ')}
         </Text>
       )}
 
-      <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
+      <Text size="sm" mb={4}>
+        Frets: {visibleFrets}
+      </Text>
+      <Slider
+        value={visibleFrets}
+        onChange={setVisibleFrets}
+        min={4}
+        max={fretCount}
+        step={1}
+        mb="lg"
+        w={300}
+      />
+
+      <div style={{ overflowX: 'auto' }}>
         <FretboardDiagram
           tuning={tuning}
-          fretCount={fretCount}
+          fretCount={visibleFrets}
           highlightedPositions={highlightedPositions}
           root={rootNote}
-          showNoteNames
+          labelMode={labelMode}
+          intervalMap={intervalMap}
         />
       </div>
     </div>
