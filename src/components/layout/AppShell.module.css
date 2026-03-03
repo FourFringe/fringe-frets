@@ -1,0 +1,82 @@
+.appShell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 240px;
+  background: var(--mantine-color-dark-7, #1a1b1e);
+  color: var(--mantine-color-dark-0, #c1c2c5);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--mantine-color-dark-4, #373a40);
+}
+
+.sidebarTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--mantine-color-white, #fff);
+}
+
+.sidebarSubtitle {
+  font-size: 0.75rem;
+  color: var(--mantine-color-dark-2, #909296);
+  margin-bottom: 1.5rem;
+}
+
+.navLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 2rem;
+}
+
+.navLink {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  color: var(--mantine-color-dark-0, #c1c2c5);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+.navLink:hover {
+  background: var(--mantine-color-dark-5, #2c2e33);
+}
+
+.navLinkActive {
+  background: var(--mantine-color-blue-9, #1864ab);
+  color: white;
+}
+
+.navLinkActive:hover {
+  background: var(--mantine-color-blue-8, #1971c2);
+}
+
+.main {
+  flex: 1;
+  padding: 1.5rem 2rem;
+  background: var(--mantine-color-dark-8, #141517);
+  color: var(--mantine-color-dark-0, #c1c2c5);
+  overflow-y: auto;
+}
+
+.sidebarDivider {
+  border: none;
+  border-top: 1px solid var(--mantine-color-dark-4, #373a40);
+  margin: 1rem 0;
+}
+
+/* Print styles: hide sidebar and chrome */
+@media print {
+  .sidebar {
+    display: none;
+  }
+
+  .main {
+    padding: 0;
+  }
+}
