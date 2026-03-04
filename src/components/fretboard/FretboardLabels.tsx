@@ -1,4 +1,4 @@
-import { fretX, fretCenterX, stringY, LEFT_MARGIN } from './fretboardLayout';
+import { fretX, fretCenterX, stringY, STRING_LABEL_X } from './fretboardLayout';
 import { Note } from 'tonal';
 
 interface FretboardLabelsProps {
@@ -16,15 +16,17 @@ interface FretboardLabelsProps {
 export function FretboardLabels({ tuning, fretCount, startFret }: FretboardLabelsProps) {
   const elements: React.ReactElement[] = [];
 
+  const stringCount = tuning.length;
+
   // String labels (pitch class only, no octave)
   tuning.forEach((note, i) => {
     const pc = Note.pitchClass(note) || note;
     elements.push(
       <text
         key={`str-label-${i}`}
-        x={LEFT_MARGIN - 12}
-        y={stringY(i)}
-        textAnchor="end"
+        x={STRING_LABEL_X}
+        y={stringY(i, stringCount)}
+        textAnchor="middle"
         dominantBaseline="central"
         fontSize={12}
         fontWeight={600}
@@ -45,7 +47,7 @@ export function FretboardLabels({ tuning, fretCount, startFret }: FretboardLabel
         <text
           key={`fret-label-${i}`}
           x={cx}
-          y={stringY(0) - 12}
+          y={stringY(stringCount - 1, stringCount) - 12}
           textAnchor="middle"
           fontSize={10}
           fill="var(--fb-label, #888)"
@@ -62,7 +64,7 @@ export function FretboardLabels({ tuning, fretCount, startFret }: FretboardLabel
       <text
         key="fret-label-0"
         x={fretCenterX(0)}
-        y={stringY(0) - 12}
+        y={stringY(stringCount - 1, stringCount) - 12}
         textAnchor="middle"
         fontSize={10}
         fill="var(--fb-label, #888)"

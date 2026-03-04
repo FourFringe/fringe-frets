@@ -78,6 +78,7 @@ export function FretboardDiagram({
         labelMode={labelMode}
         intervalMap={intervalMap}
         startFret={startFret}
+        stringCount={stringCount}
       />
     </svg>
   );

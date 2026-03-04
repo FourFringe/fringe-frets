@@ -1,4 +1,4 @@
-import { fretCenterX, stringY, DOT_RADIUS, ROOT_DOT_RADIUS } from './fretboardLayout';
+import { fretCenterX, stringY, STRING_LABEL_X, DOT_RADIUS, ROOT_DOT_RADIUS } from './fretboardLayout';
 import type { FretPosition } from '../../models/music';
 
 export type DotLabelMode = 'note' | 'interval' | 'none';
@@ -17,6 +17,8 @@ interface FretboardDotsProps {
   intervalMap?: Record<string, string>;
   /** Starting fret of the visible window (used to offset x positions). */
   startFret: number;
+  /** Total number of strings — needed to compute inverted string Y positions. */
+  stringCount: number;
 }
 
 /**
@@ -29,6 +31,7 @@ export function FretboardDots({
   labelMode,
   intervalMap,
   startFret,
+  stringCount,
 }: FretboardDotsProps) {
   return (
     <g data-testid="fretboard-dots">
@@ -37,7 +40,7 @@ export function FretboardDots({
         if (displayFret < 0) return null;
 
         const cx = fretCenterX(displayFret);
-        const cy = stringY(pos.string);
+        const cy = stringY(pos.string, stringCount);
         const isRoot = root !== undefined && pos.note === root;
         const isOpen = displayFret === 0;
         const r = isRoot ? ROOT_DOT_RADIUS : DOT_RADIUS;
@@ -54,32 +57,19 @@ export function FretboardDots({
           label = intervalMap[pos.note] ?? pos.note;
         }
 
-        // Open-string dots are rendered as hollow (outline) circles
+        // Open-string dots: hollow ring centered on the string label.
+        // No text label — the white string label on the left already names the note.
         if (isOpen) {
           return (
             <g key={`dot-${pos.string}-${pos.fret}`} data-open="true">
               <circle
-                cx={cx}
+                cx={STRING_LABEL_X}
                 cy={cy}
                 r={r}
                 fill="none"
                 stroke={isRoot ? rootColor : dotColor}
                 strokeWidth={2}
               />
-              {label && (
-                <text
-                  x={cx}
-                  y={cy}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  fontSize={isRoot ? 11 : 10}
-                  fontWeight={isRoot ? 700 : 500}
-                  fill={isRoot ? rootColor : dotColor}
-                  style={{ pointerEvents: 'none', userSelect: 'none' }}
-                >
-                  {label}
-                </text>
-              )}
             </g>
           );
         }

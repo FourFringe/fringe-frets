@@ -47,6 +47,12 @@ export const FRET_WIDTH = 1.5;
 /** String wire width. */
 export const STRING_WIDTH = 1;
 
+/**
+ * X coordinate shared by string-name labels and open-string dot indicators.
+ * Both use textAnchor="middle" / circle cx at this value so they align.
+ */
+export const STRING_LABEL_X = LEFT_MARGIN - 16; // = 30
+
 // ─── Geometry helpers ───────────────────────────────────────────────────
 
 /** Total SVG width for a given number of frets. */
@@ -73,7 +79,13 @@ export function fretCenterX(fret: number): number {
   return (left + right) / 2;
 }
 
-/** Y coordinate of a string (0-based, top string = 0). */
-export function stringY(stringIndex: number): number {
-  return TOP_MARGIN + stringIndex * STRING_SPACING;
+/**
+ * Y coordinate of a string.
+ *
+ * stringIndex is 0-based where 0 = the lowest-pitched / thickest string
+ * (e.g. low E on guitar).  Index 0 maps to the BOTTOM of the diagram so the
+ * fretboard matches its physical orientation (low string at the bottom).
+ */
+export function stringY(stringIndex: number, stringCount: number): number {
+  return TOP_MARGIN + (stringCount - 1 - stringIndex) * STRING_SPACING;
 }

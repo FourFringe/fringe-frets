@@ -12,6 +12,7 @@ import {
   NUT_WIDTH,
   RIGHT_MARGIN,
   BOTTOM_MARGIN,
+  STRING_LABEL_X,
 } from '../../src/components/fretboard/fretboardLayout';
 
 describe('fretboardLayout', () => {
@@ -63,13 +64,25 @@ describe('fretboardLayout', () => {
   });
 
   describe('stringY', () => {
-    it('places the first string at TOP_MARGIN', () => {
-      expect(stringY(0)).toBe(TOP_MARGIN);
+    it('places the highest-pitched string (last index) at the top', () => {
+      // string index 5 of 6 → top of diagram
+      expect(stringY(5, 6)).toBe(TOP_MARGIN);
+    });
+
+    it('places the lowest-pitched string (index 0) at the bottom', () => {
+      // string index 0 of 6 → bottom of diagram
+      expect(stringY(0, 6)).toBe(TOP_MARGIN + 5 * STRING_SPACING);
     });
 
     it('spaces strings evenly', () => {
-      const diff = stringY(2) - stringY(1);
+      // Adjacent strings differ by exactly STRING_SPACING in y
+      const diff = Math.abs(stringY(2, 6) - stringY(1, 6));
       expect(diff).toBe(STRING_SPACING);
+    });
+
+    it('STRING_LABEL_X is within the left margin', () => {
+      expect(STRING_LABEL_X).toBeGreaterThan(0);
+      expect(STRING_LABEL_X).toBeLessThan(LEFT_MARGIN);
     });
   });
 });

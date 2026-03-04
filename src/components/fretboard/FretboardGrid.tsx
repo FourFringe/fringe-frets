@@ -18,8 +18,9 @@ interface FretboardGridProps {
  * markers (dots on frets 3, 5, 7, 9, 12, 15, 17, 19, 21, 24).
  */
 export function FretboardGrid({ stringCount, fretCount, startFret }: FretboardGridProps) {
-  const topY = stringY(0);
-  const bottomY = stringY(stringCount - 1);
+  // After inversion: string 0 (low E) is at the bottom, string (count-1) at the top.
+  const topY = stringY(stringCount - 1, stringCount);
+  const bottomY = stringY(0, stringCount);
 
   // Single-dot fret positions and double-dot (octave) fret positions
   const singleDotFrets = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
@@ -60,7 +61,7 @@ export function FretboardGrid({ stringCount, fretCount, startFret }: FretboardGr
   // Strings
   const rightEdge = fretX(fretCount);
   for (let s = 0; s < stringCount; s++) {
-    const y = stringY(s);
+    const y = stringY(s, stringCount);
     elements.push(
       <line
         key={`string-${s}`}
