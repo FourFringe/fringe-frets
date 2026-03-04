@@ -36,13 +36,16 @@ export function FretboardDots({
   return (
     <g data-testid="fretboard-dots">
       {positions.map((pos) => {
-        const displayFret = pos.fret - startFret;
+        // When startFret === 0, fret 0 maps to the open-string column (displayFret 0).
+        // When startFret > 0, shift by +1 so the first visible fret lands in
+        // fret space 1 (not the open-string area to the left of the nut line).
+        const displayFret = startFret === 0 ? pos.fret : pos.fret - startFret + 1;
         if (displayFret < 0) return null;
 
         const cx = fretCenterX(displayFret);
         const cy = stringY(pos.string, stringCount);
         const isRoot = root !== undefined && pos.note === root;
-        const isOpen = displayFret === 0;
+        const isOpen = pos.fret === 0;  // literal open string, not just left edge of viewport
         const r = isRoot ? ROOT_DOT_RADIUS : DOT_RADIUS;
 
         const rootColor = 'var(--fb-root, #e03131)';

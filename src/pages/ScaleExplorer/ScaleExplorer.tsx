@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Title, Text, Select, Group, SegmentedControl, Slider, Stack } from '@mantine/core';
+import { Title, Text, Select, Group, SegmentedControl, RangeSlider, Stack } from '@mantine/core';
 import { NOTE_NAMES } from '../../models/music';
 import { getCommonScaleTypes, formatScaleNotes } from '../../services/scales';
 import { useScale } from '../../hooks/useScale';
@@ -9,6 +9,8 @@ import type { DotLabelMode } from '../../components/fretboard';
 interface ScaleExplorerProps {
   tuning: string[];
   fretCount: number;
+  initialFretRange?: [number, number];
+  onFretRangeChange?: (range: [number, number]) => void;
 }
 
 const commonScales = getCommonScaleTypes();
@@ -19,11 +21,19 @@ const scaleOptions = Object.entries(commonScales).map(([group, types]) => ({
 
 const noteOptions = NOTE_NAMES.map((n) => ({ value: n, label: n }));
 
-export function ScaleExplorer({ tuning, fretCount }: ScaleExplorerProps) {
+export function ScaleExplorer({ tuning, fretCount, initialFretRange, onFretRangeChange }: ScaleExplorerProps) {
   const [rootNote, setRootNote] = useState('C');
   const [scaleType, setScaleType] = useState('major');
   const [labelMode, setLabelMode] = useState<DotLabelMode>('note');
-  const [visibleFrets, setVisibleFrets] = useState(fretCount);
+  const [fretRange, setFretRangeState] = useState<[number, number]>(
+    initialFretRange ?? [0, fretCount],
+  );
+  const [startFret, endFret] = fretRange;
+
+  function setFretRange(range: [number, number]) {
+    setFretRangeState(range);
+    onFretRangeChange?.(range);
+  }
 
   const { scaleName, notes, intervals, intervalMap, highlightedPositions } = useScale(
     rootNote,
@@ -82,22 +92,38 @@ export function ScaleExplorer({ tuning, fretCount }: ScaleExplorerProps) {
       </Text>
 
       <Text size="sm" mb={4}>
-        Frets: {visibleFrets}
+        Frets: {startFret} – {endFret}
       </Text>
-      <Slider
-        value={visibleFrets}
-        onChange={setVisibleFrets}
-        min={4}
+      <RangeSlider
+        value={fretRange}
+        onChange={setFretRange}
+        min={0}
         max={fretCount}
+        minRange={2}
         step={1}
         mb="lg"
-        w={300}
+        w={400}
+        marks={[
+          { value: 0, label: '0' },
+          { value: 1, label: '1' },
+          { value: 3, label: '3' },
+          { value: 5, label: '5' },
+          { value: 7, label: '7' },
+          { value: 9, label: '9' },
+          { value: 12, label: '12' },
+          { value: 15, label: '15' },
+          { value: 17, label: '17' },
+          { value: 19, label: '19' },
+          { value: 21, label: '21' },
+          { value: 24, label: '24' },
+        ]}
       />
 
       <div style={{ overflowX: 'auto' }}>
         <FretboardDiagram
           tuning={tuning}
-          fretCount={visibleFrets}
+          fretCount={endFret - startFret}
+          startFret={startFret}
           highlightedPositions={highlightedPositions}
           root={rootNote}
           labelMode={labelMode}

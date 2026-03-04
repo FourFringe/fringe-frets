@@ -37,11 +37,16 @@ export function FretboardLabels({ tuning, fretCount, startFret }: FretboardLabel
     );
   });
 
-  // Fret numbers along the top
+  // Standard fret positions that get a number label (matches inlay dot positions)
+  const labeledFrets = new Set([1, 3, 5, 7, 9, 12, 15, 17, 19, 21, 24]);
+
+  // Fret numbers along the top.
+  // When startFret === 0: fret wire i labels absolute fret i.
+  // When startFret > 0:  fret wire i labels absolute fret (startFret + i - 1)
+  // because the +1 display shift means wire 1 is the right edge of fret startFret.
   for (let i = 1; i <= fretCount; i++) {
-    const absoluteFret = startFret + i;
-    // Only label select frets to avoid clutter, or all if window is small
-    if (fretCount <= 7 || absoluteFret % 2 === 1 || absoluteFret === 12 || absoluteFret === 24) {
+    const absoluteFret = startFret === 0 ? i : startFret + i - 1;
+    if (labeledFrets.has(absoluteFret)) {
       const cx = (fretX(i - 1) + fretX(i)) / 2;
       elements.push(
         <text

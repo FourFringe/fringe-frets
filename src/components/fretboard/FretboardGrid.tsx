@@ -42,8 +42,9 @@ export function FretboardGrid({ stringCount, fretCount, startFret }: FretboardGr
     );
   }
 
-  // Fret wires
-  for (let i = 1; i <= fretCount; i++) {
+  // Fret wires — omit the rightmost wire so the right edge stays open,
+  // matching the open left edge when startFret > 0 (no nut).
+  for (let i = 1; i <= fretCount - 1; i++) {
     const x = fretX(i);
     elements.push(
       <line

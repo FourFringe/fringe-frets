@@ -12,7 +12,7 @@ export const INSTRUMENTS: Record<string, Instrument> = {
     name: 'Guitar',
     strings: 6,
     defaultTuning: ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
-    fretCount: 22,
+    fretCount: 24,
   },
   mandolin: {
     id: 'mandolin',

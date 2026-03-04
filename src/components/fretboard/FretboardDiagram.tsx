@@ -56,9 +56,15 @@ export function FretboardDiagram({
   const width = svgWidth(fretCount);
   const height = svgHeight(stringCount);
 
-  // Filter positions to only those visible in the current fret window
+  // Filter positions to only those visible in the current fret window.
+  // When startFret === 0 the open-string column (fret 0) is included.
+  // When startFret > 0 open strings are excluded and the window is
+  // [startFret, startFret + fretCount) — the +1 display shift in FretboardDots
+  // puts the first note in fret space 1 rather than the open-string area.
   const visiblePositions = highlightedPositions.filter(
-    (p) => p.fret >= startFret && p.fret <= startFret + fretCount,
+    startFret === 0
+      ? (p) => p.fret >= 0 && p.fret <= fretCount
+      : (p) => p.fret >= startFret && p.fret < startFret + fretCount,
   );
 
   return (

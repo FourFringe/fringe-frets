@@ -197,6 +197,29 @@ describe('FretboardDiagram', () => {
     expect(circle?.getAttribute('fill')).not.toBe('none');
   });
 
+  it('does not render a hollow open circle for a fretted note at the left edge of a shifted viewport', () => {
+    // Regression: when startFret=5, a note at fret 5 has displayFret=0 but is NOT an open string.
+    // It must render as a filled dot, not a hollow open-string ring.
+    const positions: FretPosition[] = [
+      { string: 0, fret: 5, note: 'A', octave: 2, midi: 45 },
+    ];
+    render(
+      <FretboardDiagram
+        tuning={GUITAR_TUNING}
+        fretCount={5}
+        startFret={5}
+        highlightedPositions={positions}
+        labelMode="note"
+      />,
+    );
+    const dots = screen.getByTestId('fretboard-dots');
+    // No hollow open-string ring
+    expect(dots.querySelectorAll('g[data-open="true"]').length).toBe(0);
+    // The dot should be filled
+    const circle = dots.querySelector('circle');
+    expect(circle?.getAttribute('fill')).not.toBe('none');
+  });
+
   it('open-string dot labels use colored text (not white)', () => {
     const positions: FretPosition[] = [
       { string: 0, fret: 0, note: 'E', octave: 2, midi: 40 },

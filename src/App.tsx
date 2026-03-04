@@ -24,6 +24,10 @@ export default function App() {
               <ScaleExplorer
                 tuning={settings.tuning ?? instrument.defaultTuning}
                 fretCount={settings.fretCount}
+                initialFretRange={[settings.scaleStartFret, settings.scaleEndFret]}
+                onFretRangeChange={([start, end]) =>
+                  updateSettings({ scaleStartFret: start, scaleEndFret: end })
+                }
               />
             }
           />
