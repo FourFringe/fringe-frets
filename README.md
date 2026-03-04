@@ -132,7 +132,7 @@ yarn lint             # check ESLint rules
 yarn lint:fix         # auto-fix ESLint issues
 yarn format           # format all files with Prettier
 yarn format:check     # check formatting without writing
-yarn typecheck        # run TypeScript compiler in check-only mode
+yarn tsc              # run TypeScript compiler in check-only mode
 yarn validate         # typecheck + lint + format:check + test (CI gate)
 yarn build            # production build (typecheck then Vite build)
 ```
