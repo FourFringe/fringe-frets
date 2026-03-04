@@ -2,9 +2,14 @@ import { describe, it, expect } from 'vitest';
 import {
   svgWidth,
   svgHeight,
+  svgWidth_v,
+  svgHeight_v,
   fretX,
   fretCenterX,
+  fretY,
+  fretCenterY,
   stringY,
+  stringX,
   STRING_SPACING,
   FRET_SPACING,
   LEFT_MARGIN,
@@ -13,6 +18,9 @@ import {
   RIGHT_MARGIN,
   BOTTOM_MARGIN,
   STRING_LABEL_X,
+  VERT_LEFT_MARGIN,
+  VERT_LABEL_INSET,
+  ROOT_DOT_RADIUS,
 } from '../../src/components/fretboard/fretboardLayout';
 
 describe('fretboardLayout', () => {
@@ -83,6 +91,72 @@ describe('fretboardLayout', () => {
     it('STRING_LABEL_X is within the left margin', () => {
       expect(STRING_LABEL_X).toBeGreaterThan(0);
       expect(STRING_LABEL_X).toBeLessThan(LEFT_MARGIN);
+    });
+  });
+
+  // ─── Vertical orientation helpers ────────────────────────────────────────
+
+  describe('svgWidth_v', () => {
+    it('is driven by string count, not fret count', () => {
+      expect(svgWidth_v(6)).toBe(VERT_LEFT_MARGIN + 5 * STRING_SPACING + RIGHT_MARGIN);
+    });
+
+    it('handles single string', () => {
+      expect(svgWidth_v(1)).toBe(VERT_LEFT_MARGIN + RIGHT_MARGIN);
+    });
+
+    it('VERT_LEFT_MARGIN leaves enough room for labels to clear string-0 dot radius', () => {
+      // label right edge at (VERT_LEFT_MARGIN - VERT_LABEL_INSET)
+      // string-0 dot left edge at (VERT_LEFT_MARGIN - ROOT_DOT_RADIUS)
+      // label must be fully left of the dot left edge
+      expect(VERT_LEFT_MARGIN - VERT_LABEL_INSET).toBeLessThan(
+        VERT_LEFT_MARGIN - ROOT_DOT_RADIUS,
+      );
+    });
+  });
+
+  describe('svgHeight_v', () => {
+    it('is driven by fret count, not string count', () => {
+      expect(svgHeight_v(12)).toBe(TOP_MARGIN + NUT_WIDTH + 12 * FRET_SPACING + BOTTOM_MARGIN);
+    });
+  });
+
+  describe('stringX', () => {
+    it('places string 0 (low E) at VERT_LEFT_MARGIN', () => {
+      expect(stringX(0)).toBe(VERT_LEFT_MARGIN);
+    });
+
+    it('places higher-index strings further right', () => {
+      expect(stringX(1)).toBeGreaterThan(stringX(0));
+      expect(stringX(5)).toBeGreaterThan(stringX(4));
+    });
+
+    it('spaces strings evenly by STRING_SPACING', () => {
+      expect(stringX(1) - stringX(0)).toBe(STRING_SPACING);
+    });
+  });
+
+  describe('fretY', () => {
+    it('returns TOP_MARGIN for fret 0 (nut position)', () => {
+      expect(fretY(0)).toBe(TOP_MARGIN);
+    });
+
+    it('places fret 1 below the nut', () => {
+      expect(fretY(1)).toBe(TOP_MARGIN + NUT_WIDTH + FRET_SPACING);
+    });
+
+    it('spaces fret wires evenly by FRET_SPACING', () => {
+      expect(fretY(3) - fretY(2)).toBe(FRET_SPACING);
+    });
+  });
+
+  describe('fretCenterY', () => {
+    it('returns center between fret n-1 and fret n for fret >= 1', () => {
+      expect(fretCenterY(1)).toBe((fretY(0) + fretY(1)) / 2);
+    });
+
+    it('is above the nut for fret 0 (open string area)', () => {
+      expect(fretCenterY(0)).toBeLessThan(TOP_MARGIN);
     });
   });
 });

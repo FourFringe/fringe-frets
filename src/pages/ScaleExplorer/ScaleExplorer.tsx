@@ -4,7 +4,7 @@ import { NOTE_NAMES } from '../../models/music';
 import { getCommonScaleTypes, formatScaleNotes } from '../../services/scales';
 import { useScale } from '../../hooks/useScale';
 import { FretboardDiagram } from '../../components/fretboard';
-import type { DotLabelMode } from '../../components/fretboard';
+import type { DotLabelMode, FretboardOrientation } from '../../components/fretboard';
 
 interface ScaleExplorerProps {
   tuning: string[];
@@ -25,6 +25,7 @@ export function ScaleExplorer({ tuning, fretCount, initialFretRange, onFretRange
   const [rootNote, setRootNote] = useState('C');
   const [scaleType, setScaleType] = useState('major');
   const [labelMode, setLabelMode] = useState<DotLabelMode>('note');
+  const [orientation, setOrientation] = useState<FretboardOrientation>('horizontal');
   const [fretRange, setFretRangeState] = useState<[number, number]>(
     initialFretRange ?? [0, fretCount],
   );
@@ -82,6 +83,20 @@ export function ScaleExplorer({ tuning, fretCount, initialFretRange, onFretRange
             size="xs"
           />
         </Stack>
+        <Stack gap={4}>
+          <Text size="sm" fw={500}>
+            Orientation
+          </Text>
+          <SegmentedControl
+            value={orientation}
+            onChange={(v) => setOrientation(v as FretboardOrientation)}
+            data={[
+              { label: '↔ Horizontal', value: 'horizontal' },
+              { label: '↕ Vertical', value: 'vertical' },
+            ]}
+            size="xs"
+          />
+        </Stack>
       </Group>
 
       <Title order={3} mb="xs">
@@ -128,6 +143,7 @@ export function ScaleExplorer({ tuning, fretCount, initialFretRange, onFretRange
           root={rootNote}
           labelMode={labelMode}
           intervalMap={intervalMap}
+          orientation={orientation}
         />
       </div>
     </div>

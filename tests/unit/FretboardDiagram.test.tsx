@@ -237,4 +237,54 @@ describe('FretboardDiagram', () => {
     // Open-string label should NOT be white (since circle is hollow)
     expect(textEl?.getAttribute('fill')).not.toBe('white');
   });
+
+  describe('vertical orientation', () => {
+    it('renders an SVG with swapped width/height vs horizontal', () => {
+      const { container: hContainer } = render(
+        <FretboardDiagram tuning={GUITAR_TUNING} fretCount={12} orientation="horizontal" />,
+      );
+      const { container: vContainer } = render(
+        <FretboardDiagram tuning={GUITAR_TUNING} fretCount={12} orientation="vertical" />,
+      );
+      const hSvg = hContainer.querySelector('svg')!;
+      const vSvg = vContainer.querySelector('svg')!;
+      // Vertical SVG should be narrower and taller than horizontal
+      expect(Number(vSvg.getAttribute('width'))).toBeLessThan(
+        Number(hSvg.getAttribute('width')),
+      );
+      expect(Number(vSvg.getAttribute('height'))).toBeGreaterThan(
+        Number(hSvg.getAttribute('height')),
+      );
+    });
+
+    it('still renders grid, labels, and dots groups', () => {
+      render(<FretboardDiagram tuning={GUITAR_TUNING} fretCount={5} orientation="vertical" />);
+      expect(screen.getByTestId('fretboard-grid')).toBeTruthy();
+      expect(screen.getByTestId('fretboard-labels')).toBeTruthy();
+      expect(screen.getByTestId('fretboard-dots')).toBeTruthy();
+    });
+
+    it('renders string labels for vertical orientation', () => {
+      render(<FretboardDiagram tuning={GUITAR_TUNING} fretCount={3} orientation="vertical" />);
+      const labels = screen.getByTestId('fretboard-labels');
+      expect(labels.textContent).toContain('E');
+      expect(labels.textContent).toContain('A');
+    });
+
+    it('places highlighted dots in vertical mode', () => {
+      const positions: FretPosition[] = [
+        { string: 0, fret: 3, note: 'G', octave: 2, midi: 43 },
+      ];
+      render(
+        <FretboardDiagram
+          tuning={GUITAR_TUNING}
+          fretCount={5}
+          highlightedPositions={positions}
+          orientation="vertical"
+        />,
+      );
+      const dots = screen.getByTestId('fretboard-dots');
+      expect(dots.querySelectorAll('circle').length).toBe(1);
+    });
+  });
 });

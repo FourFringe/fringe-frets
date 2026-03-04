@@ -1,5 +1,15 @@
-import { fretCenterX, stringY, STRING_LABEL_X, DOT_RADIUS, ROOT_DOT_RADIUS } from './fretboardLayout';
+import {
+  fretCenterX,
+  fretCenterY,
+  stringY,
+  stringX,
+  STRING_LABEL_X,
+  STRING_LABEL_TOP_Y,
+  DOT_RADIUS,
+  ROOT_DOT_RADIUS,
+} from './fretboardLayout';
 import type { FretPosition } from '../../models/music';
+import type { FretboardOrientation } from './FretboardGrid';
 
 export type DotLabelMode = 'note' | 'interval' | 'none';
 
@@ -19,6 +29,7 @@ interface FretboardDotsProps {
   startFret: number;
   /** Total number of strings — needed to compute inverted string Y positions. */
   stringCount: number;
+  orientation?: FretboardOrientation;
 }
 
 /**
@@ -32,6 +43,7 @@ export function FretboardDots({
   intervalMap,
   startFret,
   stringCount,
+  orientation = 'horizontal',
 }: FretboardDotsProps) {
   return (
     <g data-testid="fretboard-dots">
@@ -42,8 +54,14 @@ export function FretboardDots({
         const displayFret = startFret === 0 ? pos.fret : pos.fret - startFret + 1;
         if (displayFret < 0) return null;
 
-        const cx = fretCenterX(displayFret);
-        const cy = stringY(pos.string, stringCount);
+        // In horizontal mode: cx = fret center (X), cy = string (Y)
+        // In vertical mode:   cx = string (X),     cy = fret center (Y)
+        const cx =
+          orientation === 'horizontal' ? fretCenterX(displayFret) : stringX(pos.string);
+        const cy =
+          orientation === 'horizontal'
+            ? stringY(pos.string, stringCount)
+            : fretCenterY(displayFret);
         const isRoot = root !== undefined && pos.note === root;
         const isOpen = pos.fret === 0;  // literal open string, not just left edge of viewport
         const r = isRoot ? ROOT_DOT_RADIUS : DOT_RADIUS;
@@ -60,14 +78,17 @@ export function FretboardDots({
           label = intervalMap[pos.note] ?? pos.note;
         }
 
-        // Open-string dots: hollow ring centered on the string label.
-        // No text label — the white string label on the left already names the note.
+        // Open-string dots: hollow ring.
+        // Horizontal: ring sits on STRING_LABEL_X (left of nut), same cy as the string.
+        // Vertical: ring sits above the nut (STRING_LABEL_TOP_Y), same cx as the string.
         if (isOpen) {
+          const openCx = orientation === 'horizontal' ? STRING_LABEL_X : cx;
+          const openCy = orientation === 'horizontal' ? cy : STRING_LABEL_TOP_Y;
           return (
             <g key={`dot-${pos.string}-${pos.fret}`} data-open="true">
               <circle
-                cx={STRING_LABEL_X}
-                cy={cy}
+                cx={openCx}
+                cy={openCy}
                 r={r}
                 fill="none"
                 stroke={isRoot ? rootColor : dotColor}

@@ -1,9 +1,12 @@
 import type { FretPosition } from '../../models/music';
 import type { DotLabelMode } from './FretboardDots';
-import { svgWidth, svgHeight } from './fretboardLayout';
+import type { FretboardOrientation } from './FretboardGrid';
+import { svgWidth, svgHeight, svgWidth_v, svgHeight_v } from './fretboardLayout';
 import { FretboardGrid } from './FretboardGrid';
 import { FretboardDots } from './FretboardDots';
 import { FretboardLabels } from './FretboardLabels';
+
+export type { FretboardOrientation };
 
 export interface FretboardDiagramProps {
   /** Open-string tuning, low to high (e.g. ["E2", "A2", "D3", "G3", "B3", "E4"]). */
@@ -23,6 +26,8 @@ export interface FretboardDiagramProps {
    * Only used when labelMode is 'interval'.
    */
   intervalMap?: Record<string, string>;
+  /** Whether to draw strings horizontally (default) or vertically (neck pointing up). */
+  orientation?: FretboardOrientation;
 
   // Legacy convenience prop — maps to labelMode internally
   /** @deprecated Use labelMode instead. */
@@ -46,6 +51,7 @@ export function FretboardDiagram({
   root,
   labelMode: labelModeProp,
   intervalMap,
+  orientation = 'horizontal',
   showNoteNames,
 }: FretboardDiagramProps) {
   // Resolve labelMode: explicit prop wins, then legacy showNoteNames, then default 'note'
@@ -53,14 +59,10 @@ export function FretboardDiagram({
     labelModeProp ?? (showNoteNames === false ? 'none' : 'note');
 
   const stringCount = tuning.length;
-  const width = svgWidth(fretCount);
-  const height = svgHeight(stringCount);
+  const width = orientation === 'horizontal' ? svgWidth(fretCount) : svgWidth_v(stringCount);
+  const height = orientation === 'horizontal' ? svgHeight(stringCount) : svgHeight_v(fretCount);
 
   // Filter positions to only those visible in the current fret window.
-  // When startFret === 0 the open-string column (fret 0) is included.
-  // When startFret > 0 open strings are excluded and the window is
-  // [startFret, startFret + fretCount) — the +1 display shift in FretboardDots
-  // puts the first note in fret space 1 rather than the open-string area.
   const visiblePositions = highlightedPositions.filter(
     startFret === 0
       ? (p) => p.fret >= 0 && p.fret <= fretCount
@@ -76,8 +78,18 @@ export function FretboardDiagram({
       xmlns="http://www.w3.org/2000/svg"
       style={{ fontFamily: 'system-ui, sans-serif', overflow: 'visible' }}
     >
-      <FretboardGrid stringCount={stringCount} fretCount={fretCount} startFret={startFret} />
-      <FretboardLabels tuning={tuning} fretCount={fretCount} startFret={startFret} />
+      <FretboardGrid
+        stringCount={stringCount}
+        fretCount={fretCount}
+        startFret={startFret}
+        orientation={orientation}
+      />
+      <FretboardLabels
+        tuning={tuning}
+        fretCount={fretCount}
+        startFret={startFret}
+        orientation={orientation}
+      />
       <FretboardDots
         positions={visiblePositions}
         root={root}
@@ -85,6 +97,7 @@ export function FretboardDiagram({
         intervalMap={intervalMap}
         startFret={startFret}
         stringCount={stringCount}
+        orientation={orientation}
       />
     </svg>
   );
