@@ -238,6 +238,46 @@ describe('FretboardDiagram', () => {
     expect(textEl?.getAttribute('fill')).not.toBe('white');
   });
 
+  it('renders root notes as diamond polygons, non-root as circles', () => {
+    const positions: FretPosition[] = [
+      { string: 0, fret: 3, note: 'G', octave: 2, midi: 43 },
+      { string: 1, fret: 2, note: 'B', octave: 2, midi: 47 },
+    ];
+    render(
+      <FretboardDiagram
+        tuning={GUITAR_TUNING}
+        fretCount={5}
+        highlightedPositions={positions}
+        root="G"
+        labelMode="note"
+      />,
+    );
+    const dots = screen.getByTestId('fretboard-dots');
+    // Root (G) → polygon; non-root (B) → circle
+    expect(dots.querySelectorAll('polygon').length).toBe(1);
+    expect(dots.querySelectorAll('circle').length).toBe(1);
+  });
+
+  it('suppresses open-string dots when showOpenStrings is false', () => {
+    const positions: FretPosition[] = [
+      { string: 0, fret: 0, note: 'E', octave: 2, midi: 40 },
+      { string: 0, fret: 3, note: 'G', octave: 2, midi: 43 },
+    ];
+    render(
+      <FretboardDiagram
+        tuning={GUITAR_TUNING}
+        fretCount={5}
+        highlightedPositions={positions}
+        showOpenStrings={false}
+        labelMode="note"
+      />,
+    );
+    const dots = screen.getByTestId('fretboard-dots');
+    // fret-0 position filtered out; only fret-3 dot rendered
+    expect(dots.querySelectorAll('g[data-open="true"]').length).toBe(0);
+    expect(dots.querySelectorAll('circle').length).toBe(1);
+  });
+
   describe('vertical orientation', () => {
     it('renders an SVG with swapped width/height vs horizontal', () => {
       const { container: hContainer } = render(

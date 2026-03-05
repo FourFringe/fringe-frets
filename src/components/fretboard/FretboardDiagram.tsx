@@ -28,6 +28,11 @@ export interface FretboardDiagramProps {
   intervalMap?: Record<string, string>;
   /** Whether to draw strings horizontally (default) or vertically (neck pointing up). */
   orientation?: FretboardOrientation;
+  /**
+   * When false, fret-0 (open-string) positions are suppressed from the diagram.
+   * Defaults to true. Set to false for mode diagrams where open strings are distracting.
+   */
+  showOpenStrings?: boolean;
 
   // Legacy convenience prop — maps to labelMode internally
   /** @deprecated Use labelMode instead. */
@@ -52,6 +57,7 @@ export function FretboardDiagram({
   labelMode: labelModeProp,
   intervalMap,
   orientation = 'horizontal',
+  showOpenStrings = true,
   showNoteNames,
 }: FretboardDiagramProps) {
   // Resolve labelMode: explicit prop wins, then legacy showNoteNames, then default 'note'
@@ -63,11 +69,13 @@ export function FretboardDiagram({
   const height = orientation === 'horizontal' ? svgHeight(stringCount) : svgHeight_v(fretCount);
 
   // Filter positions to only those visible in the current fret window.
-  const visiblePositions = highlightedPositions.filter(
-    startFret === 0
-      ? (p) => p.fret >= 0 && p.fret <= fretCount
-      : (p) => p.fret >= startFret && p.fret < startFret + fretCount,
-  );
+  const visiblePositions = highlightedPositions
+    .filter(
+      startFret === 0
+        ? (p) => p.fret >= 0 && p.fret <= fretCount
+        : (p) => p.fret >= startFret && p.fret < startFret + fretCount,
+    )
+    .filter((p) => showOpenStrings || p.fret !== 0);
 
   return (
     <svg

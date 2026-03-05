@@ -8,6 +8,7 @@ import {
   DOT_RADIUS,
   ROOT_DOT_RADIUS,
 } from './fretboardLayout';
+import { Note } from 'tonal';
 import type { FretPosition } from '../../models/music';
 import type { FretboardOrientation } from './FretboardGrid';
 
@@ -62,7 +63,10 @@ export function FretboardDots({
           orientation === 'horizontal'
             ? stringY(pos.string, stringCount)
             : fretCenterY(displayFret);
-        const isRoot = root !== undefined && pos.note === root;
+        const isRoot =
+          root !== undefined &&
+          Note.chroma(pos.note) !== null &&
+          Note.chroma(pos.note) === Note.chroma(root);
         const isOpen = pos.fret === 0;  // literal open string, not just left edge of viewport
         const r = isRoot ? ROOT_DOT_RADIUS : DOT_RADIUS;
 
@@ -78,7 +82,7 @@ export function FretboardDots({
           label = intervalMap[pos.note] ?? pos.note;
         }
 
-        // Open-string dots: hollow ring.
+        // Open-string dots: hollow ring (or hollow diamond for root).
         // Horizontal: ring sits on STRING_LABEL_X (left of nut), same cy as the string.
         // Vertical: ring sits above the nut (STRING_LABEL_TOP_Y), same cx as the string.
         if (isOpen) {
@@ -86,28 +90,48 @@ export function FretboardDots({
           const openCy = orientation === 'horizontal' ? cy : STRING_LABEL_TOP_Y;
           return (
             <g key={`dot-${pos.string}-${pos.fret}`} data-open="true">
-              <circle
-                cx={openCx}
-                cy={openCy}
-                r={r}
-                fill="none"
-                stroke={isRoot ? rootColor : dotColor}
-                strokeWidth={2}
-              />
+              {isRoot ? (
+                <polygon
+                  points={`${openCx},${openCy - r} ${openCx + r},${openCy} ${openCx},${openCy + r} ${openCx - r},${openCy}`}
+                  fill="none"
+                  stroke={rootColor}
+                  strokeWidth={2}
+                />
+              ) : (
+                <circle
+                  cx={openCx}
+                  cy={openCy}
+                  r={r}
+                  fill="none"
+                  stroke={dotColor}
+                  strokeWidth={2}
+                />
+              )}
             </g>
           );
         }
 
+        // Fretted root note: diamond (rotated square) for B&W print legibility.
+        // Fretted non-root: filled circle.
         return (
           <g key={`dot-${pos.string}-${pos.fret}`}>
-            <circle
-              cx={cx}
-              cy={cy}
-              r={r}
-              fill={isRoot ? rootColor : dotColor}
-              stroke={isRoot ? rootStroke : dotStroke}
-              strokeWidth={1.5}
-            />
+            {isRoot ? (
+              <polygon
+                points={`${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`}
+                fill={rootColor}
+                stroke={rootStroke}
+                strokeWidth={1.5}
+              />
+            ) : (
+              <circle
+                cx={cx}
+                cy={cy}
+                r={r}
+                fill={dotColor}
+                stroke={dotStroke}
+                strokeWidth={1.5}
+              />
+            )}
             {label && (
               <text
                 x={cx}

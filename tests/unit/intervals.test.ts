@@ -80,5 +80,18 @@ describe('intervals service', () => {
     it('returns empty map for empty input', () => {
       expect(buildIntervalMap([], [])).toEqual({});
     });
+
+    it('also indexes by simplified enharmonic spelling (e.g. E# → F)', () => {
+      // C# major has E# and B# which the fretboard represents as F and C
+      const notes = ['C#', 'D#', 'E#', 'F#', 'G#', 'A#', 'B#'];
+      const intervals = ['1P', '2M', '3M', '4P', '5P', '6M', '7M'];
+      const map = buildIntervalMap(notes, intervals);
+      // Original spellings present
+      expect(map['E#']).toBe('3');
+      expect(map['B#']).toBe('7');
+      // Simplified enharmonic aliases also present
+      expect(map['F']).toBe('3');  // E# → F
+      expect(map['C']).toBe('7');  // B# → C (B# is one octave = same chroma, Note.simplify gives C)
+    });
   });
 });

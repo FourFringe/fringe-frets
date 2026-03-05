@@ -1,3 +1,5 @@
+import { Note } from 'tonal';
+
 /**
  * Short display labels for intervals, as musicians typically write them.
  *
@@ -48,6 +50,11 @@ export function intervalLabel(interval: string): string {
  * Build a map from pitch class → interval label, given a root, a list of
  * pitch classes (notes), and the corresponding interval list from tonal.
  *
+ * Entries are indexed by BOTH the tonal spelling (e.g. "E#") AND its
+ * simplified enharmonic equivalent (e.g. "F"), so lookups based on
+ * fretboard positions (which always use simplified sharps/naturals) work
+ * regardless of the scale's accidental convention.
+ *
  * Example: buildIntervalMap(['C', 'E', 'G'], ['1P', '3M', '5P'])
  *          → { C: 'R', E: '3', G: '5' }
  */
@@ -57,7 +64,14 @@ export function buildIntervalMap(
 ): Record<string, string> {
   const map: Record<string, string> = {};
   for (let i = 0; i < notes.length; i++) {
-    map[notes[i]] = intervalLabel(intervals[i]);
+    const label = intervalLabel(intervals[i]);
+    map[notes[i]] = label;
+    // Also index by the simplified enharmonic spelling so the lookup works
+    // when the fretboard uses a different accidental (e.g. E# → F, B# → C).
+    const simplified = Note.simplify(notes[i]);
+    if (simplified && simplified !== notes[i]) {
+      map[simplified] = label;
+    }
   }
   return map;
 }

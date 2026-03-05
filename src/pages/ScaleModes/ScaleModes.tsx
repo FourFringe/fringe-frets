@@ -28,9 +28,19 @@ const MODES = [
   { name: 'Locrian',     type: 'locrian'     },
 ];
 
-/** Only the natural note roots produce the standard diatonic modes. */
-const ROOT_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-const rootOptions = ROOT_NOTES.map((n) => ({ value: n, label: `${n} Major` }));
+/** All 12 pitch classes as roots.
+ *  D#, G#, A# are replaced by their flat enharmonics to avoid double-sharps
+ *  in the generated scales (e.g. A# major produces C##, F##, G##). */
+const ROOT_NOTES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+/** Display label for roots that have an enharmonic pair. */
+const ENHARMONIC_LABEL: Record<string, string> = {
+  'C#': 'C\u266f/D\u266d', 'Eb': 'D\u266f/E\u266d',
+  'F#': 'F\u266f/G\u266d', 'Ab': 'G\u266f/A\u266d', 'Bb': 'A\u266f/B\u266d',
+};
+const rootOptions = ROOT_NOTES.map((n) => ({
+  value: n,
+  label: ENHARMONIC_LABEL[n] ? `${ENHARMONIC_LABEL[n]} Major` : `${n} Major`,
+}));
 
 const SLIDER_MARKS = [
   { value: 0, label: '0' },
