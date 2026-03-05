@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 import { AppShell } from './components/layout/AppShell';
 import { Home } from './pages/Home/Home';
 import { ScaleExplorer } from './pages/ScaleExplorer/ScaleExplorer';
+import { ScaleModes } from './pages/ScaleModes/ScaleModes';
 import { ChordBuilder } from './pages/ChordBuilder/ChordBuilder';
 import { TabViewer } from './pages/TabViewer/TabViewer';
 import { useSettings } from './hooks/useSettings';
@@ -30,6 +31,21 @@ export default function App() {
                 }
                 initialOrientation={settings.scaleOrientation}
                 onOrientationChange={(o) => updateSettings({ scaleOrientation: o })}
+              />
+            }
+          />
+          <Route
+            path="modes"
+            element={
+              <ScaleModes
+                tuning={settings.tuning ?? instrument.defaultTuning}
+                fretCount={settings.fretCount}
+                initialRoot={settings.scaleModesRoot}
+                onRootChange={(r) => updateSettings({ scaleModesRoot: r })}
+                initialFretRange={[settings.scaleModesStartFret, settings.scaleModesEndFret]}
+                onFretRangeChange={([start, end]) =>
+                  updateSettings({ scaleModesStartFret: start, scaleModesEndFret: end })
+                }
               />
             }
           />

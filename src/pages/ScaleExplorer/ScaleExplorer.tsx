@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Title, Text, Select, Group, SegmentedControl, RangeSlider, Stack } from '@mantine/core';
 import { NOTE_NAMES } from '../../models/music';
-import { getCommonScaleTypes, formatScaleNotes } from '../../services/scales';
+import { getCommonScaleTypes } from '../../services/scales';
 import { useScale } from '../../hooks/useScale';
 import { FretboardDiagram } from '../../components/fretboard';
 import type { DotLabelMode, FretboardOrientation } from '../../components/fretboard';
+import { ScaleNoteList } from '../../components/ScaleNoteList';
 import styles from './ScaleExplorer.module.css';
 
 interface ScaleExplorerProps {
@@ -146,7 +147,7 @@ export function ScaleExplorer({ tuning, fretCount, initialFretRange, onFretRange
           {scaleName}
         </Title>
         <Text size="sm" c="dimmed" mb="md">
-          Notes: {formatScaleNotes(notes, intervals)}
+          <ScaleNoteList notes={notes} intervals={intervals} intervalMap={intervalMap} />
         </Text>
 
         <div

@@ -1,0 +1,68 @@
+/* ── Screen styles ───────────────────────────────────────────────────────── */
+
+.modesGrid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  align-items: flex-start;
+  /* Extra bottom padding so scrollbar doesn't overlap content */
+  padding-bottom: 12px;
+}
+
+.modeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.modeLabel {
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ── Print styles ────────────────────────────────────────────────────────── */
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 1cm;
+  }
+
+  .printHide {
+    display: none !important;
+  }
+
+  .printContent {
+    width: 100%;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .pageTitle {
+    margin-bottom: 0.4cm;
+  }
+
+  /* 7 equal columns, no scrolling */
+  .modesGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    overflow: visible;
+    padding-bottom: 0;
+    align-items: start;
+  }
+
+  .modeCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Each vertical fretboard SVG: fill its grid column width, fixed print height */
+  .modeCard svg {
+    display: block;
+    width: 100% !important;
+    height: 14cm !important;
+  }
+}

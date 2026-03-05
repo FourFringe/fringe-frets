@@ -53,6 +53,14 @@ export function AppShell({ settings, onUpdateSettings }: AppShellProps) {
             Scale Explorer
           </NavLink>
           <NavLink
+            to="/modes"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+            }
+          >
+            Scale Modes
+          </NavLink>
+          <NavLink
             to="/chords"
             className={({ isActive }) =>
               `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`

@@ -1,0 +1,54 @@
+.noteList {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0;
+  font-family: inherit;
+}
+
+/* Each note + its preceding separator live in one flex item */
+.item {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+/* Stacked note name + interval label */
+.noteItem {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 1.6em;
+}
+
+.noteName {
+  font-size: 0.9em;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.intervalLabel {
+  font-size: 0.68em;
+  color: var(--mantine-color-dimmed);
+  line-height: 1.1;
+}
+
+/* Step separators */
+.wholeStep,
+.halfStep {
+  align-self: center;
+  padding: 0 3px;
+  font-size: 0.8em;
+  line-height: 1;
+  color: var(--mantine-color-dimmed);
+  /* Shift up slightly so it aligns with the note name row, not the interval row */
+  margin-bottom: 0.9em;
+}
+
+.wholeStep {
+  opacity: 0.6;
+}
+
+.halfStep {
+  opacity: 0.35;
+}

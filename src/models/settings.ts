@@ -8,6 +8,9 @@ export interface UserSettings {
   scaleStartFret: number;
   scaleEndFret: number;
   scaleOrientation: 'horizontal' | 'vertical';
+  scaleModesRoot: string;
+  scaleModesStartFret: number;
+  scaleModesEndFret: number;
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -20,4 +23,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   scaleStartFret: 0,
   scaleEndFret: 24,
   scaleOrientation: 'horizontal',
+  scaleModesRoot: 'C',
+  scaleModesStartFret: 0,
+  scaleModesEndFret: 12,
 };
