@@ -21,6 +21,10 @@
   white-space: nowrap;
 }
 
+.printContent {
+  margin-top: calc(var(--mantine-spacing-xl) * 2);
+}
+
 /* ── Print styles ────────────────────────────────────────────────────────── */
 
 @media print {
@@ -35,8 +39,18 @@
 
   .printContent {
     width: 100%;
+    margin-top: 0;
     page-break-inside: avoid;
     break-inside: avoid;
+  }
+
+  /* Center the title and note list */
+  .printContent h3 {
+    text-align: center;
+  }
+
+  .printContent > p {
+    text-align: center;
   }
 
   .pageTitle {
