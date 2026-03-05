@@ -7,6 +7,7 @@ export interface UserSettings {
   lastChords: Array<{ root: string; type: string; position: number }>;
   scaleStartFret: number;
   scaleEndFret: number;
+  scaleOrientation: 'horizontal' | 'vertical';
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -18,4 +19,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
   lastChords: [],
   scaleStartFret: 0,
   scaleEndFret: 24,
+  scaleOrientation: 'horizontal',
 };

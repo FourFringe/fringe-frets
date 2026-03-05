@@ -90,13 +90,18 @@
   color: var(--mantine-color-dark-0, #c1c2c5);
 }
 
-/* Print styles: hide sidebar and chrome */
+/* Print styles: hide sidebar, let main fill the full page */
 @media print {
+  .appShell {
+    display: block;
+  }
+
   .sidebar {
     display: none;
   }
 
   .main {
     padding: 0;
+    overflow: visible;
   }
 }

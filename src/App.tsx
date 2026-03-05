@@ -28,6 +28,8 @@ export default function App() {
                 onFretRangeChange={([start, end]) =>
                   updateSettings({ scaleStartFret: start, scaleEndFret: end })
                 }
+                initialOrientation={settings.scaleOrientation}
+                onOrientationChange={(o) => updateSettings({ scaleOrientation: o })}
               />
             }
           />

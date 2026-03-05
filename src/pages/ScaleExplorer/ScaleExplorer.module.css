@@ -1,0 +1,55 @@
+/* ── Screen styles ───────────────────────────────────────────────────────── */
+
+.fretboardContainer {
+  overflow-x: auto;
+}
+
+.fretboardContainer svg {
+  display: block;
+}
+
+/* ── Print styles ────────────────────────────────────────────────────────── */
+
+@media print {
+  /* Landscape gives the horizontal fretboard the most room */
+  @page {
+    size: landscape;
+    margin: 1.5cm;
+  }
+
+  /* Hide all interactive / navigational chrome */
+  .printHide {
+    display: none !important;
+  }
+
+  /* The printable block: fill the page, no breaks */
+  .printContent {
+    width: 100%;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .fretboardContainer {
+    overflow: visible;
+  }
+
+  /*
+   * Give the SVG explicit cm values for both dimensions.
+   * The viewBox + preserveAspectRatio="xMidYMid meet" (SVG default) will
+   * scale the diagram to fit within the box while keeping the correct ratio.
+   *
+   * Horizontal: full page width, short height (~3cm) — keeps it on one page.
+   * Vertical: fixed tall height, auto width — stays narrow.
+   */
+  .fretboardContainer[data-orientation='horizontal'] svg {
+    display: block;
+    width: 100% !important;
+    height: 3cm !important;
+  }
+
+  .fretboardContainer[data-orientation='vertical'] svg {
+    display: block;
+    width: auto !important;
+    height: 15cm !important;
+  }
+}
