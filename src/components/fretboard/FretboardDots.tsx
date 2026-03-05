@@ -8,7 +8,7 @@ import {
   DOT_RADIUS,
   ROOT_DOT_RADIUS,
 } from './fretboardLayout';
-import { Note } from 'tonal';
+import { isSameNote } from '../../services/notes';
 import type { FretPosition } from '../../models/music';
 import type { FretboardOrientation } from './FretboardGrid';
 
@@ -63,10 +63,7 @@ export function FretboardDots({
           orientation === 'horizontal'
             ? stringY(pos.string, stringCount)
             : fretCenterY(displayFret);
-        const isRoot =
-          root !== undefined &&
-          Note.chroma(pos.note) !== null &&
-          Note.chroma(pos.note) === Note.chroma(root);
+        const isRoot = root !== undefined && isSameNote(pos.note, root);
         const isOpen = pos.fret === 0;  // literal open string, not just left edge of viewport
         const r = isRoot ? ROOT_DOT_RADIUS : DOT_RADIUS;
 

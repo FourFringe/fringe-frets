@@ -8,9 +8,9 @@ import {
   Stack,
   SegmentedControl,
 } from '@mantine/core';
-import { Scale } from 'tonal';
 import { getScale } from '../../services/scales';
 import { buildIntervalMap } from '../../services/intervals';
+import { enharmonicDisplayLabel } from '../../services/notes';
 import { ScaleNoteList } from '../../components/ScaleNoteList';
 import { buildFretboard, filterByPitchClasses } from '../../services/fretboard';
 import { FretboardDiagram } from '../../components/fretboard';
@@ -29,17 +29,12 @@ const MODES = [
 ];
 
 /** All 12 pitch classes as roots.
- *  D#, G#, A# are replaced by their flat enharmonics to avoid double-sharps
- *  in the generated scales (e.g. A# major produces C##, F##, G##). */
+ *  Eb, Ab, Bb are used instead of D#, G#, A# to avoid double-sharps in the
+ *  generated scales (e.g. A# major produces C##, F##, G##). */
 const ROOT_NOTES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
-/** Display label for roots that have an enharmonic pair. */
-const ENHARMONIC_LABEL: Record<string, string> = {
-  'C#': 'C\u266f/D\u266d', 'Eb': 'D\u266f/E\u266d',
-  'F#': 'F\u266f/G\u266d', 'Ab': 'G\u266f/A\u266d', 'Bb': 'A\u266f/B\u266d',
-};
 const rootOptions = ROOT_NOTES.map((n) => ({
   value: n,
-  label: ENHARMONIC_LABEL[n] ? `${ENHARMONIC_LABEL[n]} Major` : `${n} Major`,
+  label: `${enharmonicDisplayLabel(n) ?? n} Major`,
 }));
 
 const SLIDER_MARKS = [
@@ -102,10 +97,10 @@ export function ScaleModes({
 
     const modes = MODES.map((mode, i) => {
       const modeRoot = majorNotes[i] ?? root;
-      // Get mode-specific intervals from tonal (e.g. D dorian → b3, b7)
-      const modeScale = Scale.get(`${modeRoot} ${mode.type}`);
-      const modeNotes = modeScale.notes.length > 0 ? modeScale.notes : majorNotes;
-      const intervalMap = buildIntervalMap(modeNotes, modeScale.intervals);
+      // Get mode-specific intervals through the scales service
+      const modeInfo = getScale(modeRoot, mode.type);
+      const modeNotes = modeInfo?.notes ?? majorNotes;
+      const intervalMap = buildIntervalMap(modeNotes, modeInfo?.intervals ?? []);
       return {
         name: mode.name,
         root: modeRoot,

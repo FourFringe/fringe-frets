@@ -1,4 +1,4 @@
-import { Note } from 'tonal';
+import { simplifyNote } from './notes';
 
 /**
  * Short display labels for intervals, as musicians typically write them.
@@ -68,8 +68,8 @@ export function buildIntervalMap(
     map[notes[i]] = label;
     // Also index by the simplified enharmonic spelling so the lookup works
     // when the fretboard uses a different accidental (e.g. E# → F, B# → C).
-    const simplified = Note.simplify(notes[i]);
-    if (simplified && simplified !== notes[i]) {
+    const simplified = simplifyNote(notes[i]);
+    if (simplified !== notes[i]) {
       map[simplified] = label;
     }
   }

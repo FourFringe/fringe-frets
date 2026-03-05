@@ -1,13 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { getNoteAtFret, getNoteAtPosition, buildFretboard, filterByPitchClasses } from '../../src/services/fretboard';
+import { getNoteAtPosition, buildFretboard, filterByPitchClasses } from '../../src/services/fretboard';
 
 describe('fretboard service', () => {
-  describe('getNoteAtFret', () => {
-    it('returns the open string note at fret 0', () => {
-      expect(getNoteAtFret('E4', 0)).toBe('E4');
-    });
-  });
-
   describe('getNoteAtPosition', () => {
     it('returns correct note at fret 0 (open string)', () => {
       const pos = getNoteAtPosition('E4', 0);

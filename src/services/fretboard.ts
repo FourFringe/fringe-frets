@@ -2,15 +2,6 @@ import { Note } from 'tonal';
 import type { FretPosition } from '../models/music';
 
 /**
- * Get the note name (without octave) at a given string and fret position.
- * The open string note is transposed up by the number of fret semitones.
- */
-export function getNoteAtFret(openStringNote: string, fret: number): string {
-  if (fret === 0) return openStringNote;
-  return Note.transpose(openStringNote, fret === 1 ? 'm2' : `${fret}m2`.replace(/\d+/, String(fret))) ?? openStringNote;
-}
-
-/**
  * Compute the note at a specific (string, fret) position using semitone transposition.
  */
 export function getNoteAtPosition(openStringNote: string, fret: number): FretPosition {

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getChord, getChordNotes } from '../services/chords';
+import { getChord } from '../services/chords';
 import { buildIntervalMap } from '../services/intervals';
 import { buildFretboard, filterByPitchClasses } from '../services/fretboard';
 import type { FretPosition } from '../models/music';
@@ -24,8 +24,8 @@ export function useChord(
 ): UseChordResult {
   return useMemo(() => {
     const chord = getChord(root, chordType);
-    const notes = getChordNotes(root, chordType);
-    const intervals = chord ? chord.intervals : [];
+    const notes = chord?.notes ?? [];
+    const intervals = chord?.intervals ?? [];
     const intervalMap = notes.length > 0 ? buildIntervalMap(notes, intervals) : {};
     const fretboard = buildFretboard(tuning, fretCount);
     const highlightedPositions = notes.length > 0 ? filterByPitchClasses(fretboard, notes) : [];
