@@ -1,4 +1,4 @@
-import { Chord as TonalChord, ChordType } from 'tonal';
+import { Chord as TonalChord, ChordType, Scale as TonalScale } from 'tonal';
 
 export interface ChordInfo {
   name: string;
@@ -59,4 +59,45 @@ export function getChordNotes(root: string, chordType: string): string[] {
   const chord = TonalChord.get(`${root} ${chordType}`);
   if (chord.empty) return [];
   return chord.notes;
+}
+
+/**
+ * The diatonic triad quality for each scale degree of the major scale.
+ * Degrees: I ii iii IV V vi vii°
+ */
+const DIATONIC_TRIAD_TYPES = [
+  'major', 'minor', 'minor', 'major', 'major', 'minor', 'diminished',
+] as const;
+
+export interface DiatonicChord {
+  /** Scale-degree root note, e.g. 'D' */
+  root: string;
+  /** Chord quality, e.g. 'minor' */
+  type: string;
+  /** Chord symbol, e.g. 'Dm' */
+  symbol: string;
+  /** Pitch-class notes, e.g. ['D', 'F', 'A'] */
+  notes: string[];
+  /** Intervals relative to chord root, e.g. ['1P', '3m', '5P'] */
+  intervals: string[];
+}
+
+/**
+ * Return the 7 diatonic triads of a major scale.
+ */
+export function getDiatonicChords(scaleRoot: string): DiatonicChord[] {
+  const scale = TonalScale.get(`${scaleRoot} major`);
+  if (scale.empty) return [];
+
+  return scale.notes.map((note, i) => {
+    const type = DIATONIC_TRIAD_TYPES[i];
+    const chord = TonalChord.get(`${note} ${type}`);
+    return {
+      root: note,
+      type,
+      symbol: chord.symbol,
+      notes: chord.notes,
+      intervals: chord.intervals,
+    };
+  });
 }

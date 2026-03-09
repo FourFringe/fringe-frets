@@ -129,7 +129,7 @@ export function ScaleModes({
       {/* Controls — hidden in print */}
       <div className={styles.printHide}>
         <Title order={1} mb="xs">
-          Scale Modes
+          Mode Scales
         </Title>
         <Text c="dimmed" mb="xl">
           The seven modes of a major scale, shown side by side.

@@ -3,6 +3,7 @@ import { AppShell } from './components/layout/AppShell';
 import { Home } from './pages/Home/Home';
 import { ScaleExplorer } from './pages/ScaleExplorer/ScaleExplorer';
 import { ScaleModes } from './pages/ScaleModes/ScaleModes';
+import { ModeChords } from './pages/ModeChords/ModeChords';
 import { ChordBuilder } from './pages/ChordBuilder/ChordBuilder';
 import { TabViewer } from './pages/TabViewer/TabViewer';
 import { useSettings } from './hooks/useSettings';
@@ -46,6 +47,16 @@ export default function App() {
                 onFretRangeChange={([start, end]) =>
                   updateSettings({ scaleModesStartFret: start, scaleModesEndFret: end })
                 }
+              />
+            }
+          />
+          <Route
+            path="mode-chords"
+            element={
+              <ModeChords
+                tuning={settings.tuning ?? instrument.defaultTuning}
+                initialRoot={settings.modeChordsRoot}
+                onRootChange={(r) => updateSettings({ modeChordsRoot: r })}
               />
             }
           />

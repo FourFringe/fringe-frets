@@ -1,0 +1,54 @@
+.printHide {
+  /* hidden during print */
+}
+
+.printContent {
+  /* shown during print */
+}
+
+.pageTitle {
+  /* used in print version */
+}
+
+.chordsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.chordCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chordLabel {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--mantine-color-text);
+  letter-spacing: 0.01em;
+}
+
+/* ── Print ──────────────────────────────────────────── */
+@media print {
+  .printHide {
+    display: none !important;
+  }
+
+  @page {
+    size: landscape;
+    margin: 1cm;
+  }
+
+  .printContent {
+    page-break-inside: avoid;
+  }
+
+  .chordsRow {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+}

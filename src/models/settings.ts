@@ -11,6 +11,7 @@ export interface UserSettings {
   scaleModesRoot: string;
   scaleModesStartFret: number;
   scaleModesEndFret: number;
+  modeChordsRoot: string;
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -26,4 +27,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
   scaleModesRoot: 'C',
   scaleModesStartFret: 0,
   scaleModesEndFret: 12,
+  modeChordsRoot: 'C',
 };

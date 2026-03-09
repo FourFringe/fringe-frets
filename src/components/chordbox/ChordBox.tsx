@@ -168,18 +168,38 @@ export function ChordBox({
     }
 
     if (fret === 0) {
-      // Open: draw ○
+      // Open: draw ○ with optional note/interval label
+      let openLabel: string | null = null;
+      if (labelMode === 'note' && noteName) {
+        openLabel = noteName;
+      } else if (labelMode === 'interval' && noteName && intervalMap) {
+        openLabel = intervalMap[noteName] ?? noteName;
+      }
+      const openFontSize = openLabel && openLabel.length > 2 ? 7 : 8;
       indicators.push(
-        <circle
-          key={`ind-${i}`}
-          data-testid={`chord-box-open-${i}`}
-          cx={cx}
-          cy={iy}
-          r={6}
-          fill="none"
-          stroke={openColor}
-          strokeWidth={1.5}
-        />,
+        <g key={`ind-${i}`} data-testid={`chord-box-open-${i}`}>
+          <circle
+            cx={cx}
+            cy={iy}
+            r={9}
+            fill="none"
+            stroke={openColor}
+            strokeWidth={1.5}
+          />
+          {openLabel && (
+            <text
+              x={cx}
+              y={iy + 0.5}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill={openColor}
+              fontSize={openFontSize}
+              fontWeight="600"
+            >
+              {openLabel}
+            </text>
+          )}
+        </g>,
       );
       return;
     }

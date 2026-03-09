@@ -58,7 +58,15 @@ export function AppShell({ settings, onUpdateSettings }: AppShellProps) {
               `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
             }
           >
-            Scale Modes
+            Mode Scales
+          </NavLink>
+          <NavLink
+            to="/mode-chords"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+            }
+          >
+            Mode Chords
           </NavLink>
           <NavLink
             to="/chords"
