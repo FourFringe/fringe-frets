@@ -115,16 +115,20 @@ export function ChordBox({
     );
   });
 
-  // ── Position label (e.g. "2fr") ───────────────────────────────────────────
+  // ── Position label (e.g. "5fr") ───────────────────────────────────────────
+  // Placed on the LEFT side of the diagram, vertically centred in the first
+  // fret space — the standard convention in most digital chord charts.
+  // The number is the topmost (lowest-numbered) fret visible in the window.
   const positionLabel =
     voicing.baseFret > 1 ? (
       <text
         key="pos-label"
-        x={cbStringX(stringCount - 1) + 6}
-        y={cbFretLineY(1) + 4}
+        x={cbStringX(0) - 4}
+        y={cbDotCY(1)}
         fill={textColor}
         fontSize={10}
-        textAnchor="start"
+        textAnchor="end"
+        dominantBaseline="middle"
         data-testid="chord-box-position"
       >
         {voicing.baseFret}fr

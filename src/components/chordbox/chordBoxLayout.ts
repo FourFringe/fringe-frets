@@ -30,7 +30,7 @@ export const CB_RIGHT_MARGIN = 8;
 export const CB_TOP_MARGIN = 8;
 
 /** Vertical space reserved for X / O string indicators. */
-export const CB_INDICATOR_HEIGHT = 20;
+export const CB_INDICATOR_HEIGHT = 28;
 
 /** Bottom margin below the lowest fret line. */
 export const CB_BOTTOM_MARGIN = 10;
