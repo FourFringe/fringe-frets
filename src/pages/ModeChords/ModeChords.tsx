@@ -20,15 +20,18 @@ function formatNoteDisplay(pc: string): string {
   return pc.replace('#', '♯').replace(/([A-G])b$/, '$1♭');
 }
 
+const ROMAN_NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+
 /**
- * Build a chord label in the form "C maj", "D min", "B dim".
+ * Build a chord label in the form "I – C maj", "II – D min", "VII – B dim".
  */
-function formatDiatonicLabel(root: string, type: string): string {
+function formatDiatonicLabel(degree: number, root: string, type: string): string {
   const qualifier = type === 'major' ? 'maj' : type === 'minor' ? 'min' : 'dim';
-  return `${formatNoteDisplay(root)} ${qualifier}`;
+  return `${ROMAN_NUMERALS[degree]}. (${formatNoteDisplay(root)} ${qualifier})`;
 }
 
 interface ChordRowItem {
+  degree: number;
   chord: ReturnType<typeof getDiatonicChords>[number];
   intervalMap: Record<string, string>;
   voicing: ChordVoicing | null;
@@ -114,17 +117,17 @@ function buildAlgorithmicRows(
   const rows: ChordRow[] = [];
 
   for (let start = 1; start <= 12 && rows.length < MAX_ROWS; start++) {
-    const items: ChordRowItem[] = diatonic.map((chord) => {
+    const items: ChordRowItem[] = diatonic.map((chord, degree) => {
       const intervalMap = buildIntervalMap(chord.notes, chord.intervals);
       const voicing = findVoicingInWindow(chord.notes, tuning, start, windowSize);
 
       // Reject voicings with too few sounding strings
       if (voicing) {
         const active = voicing.strings.filter((f) => f !== null).length;
-        if (active < minStrings) return { chord, intervalMap, voicing: null };
+        if (active < minStrings) return { degree, chord, intervalMap, voicing: null };
       }
 
-      return { chord, intervalMap, voicing };
+      return { degree, chord, intervalMap, voicing };
     });
 
     // Only include the row if at least one chord produced a valid voicing
@@ -198,7 +201,7 @@ function buildRows(
     const rowHighFret = rowBaseFret + fretWindow - 1;
 
     // Build each chord item, finding the best-fitting voicing for the range
-    const items: ChordRowItem[] = allVoicings.map(({ chord, intervalMap, voicings }) => {
+    const items: ChordRowItem[] = allVoicings.map(({ chord, intervalMap, voicings }, degree) => {
       const natural = voicings[posIdx] ?? null;
 
       // Check if the natural voicing fits entirely in the row's fret range
@@ -206,6 +209,7 @@ function buildRows(
         const span = voicingFretSpan(natural);
         if (!span || (span.minFret >= rowBaseFret && span.maxFret <= rowHighFret)) {
           return {
+            degree,
             chord,
             intervalMap,
             voicing: { ...natural, baseFret: rowBaseFret },
@@ -217,13 +221,14 @@ function buildRows(
       const alt = findVoicingForRange(chord.root, chord.type, rowBaseFret, rowHighFret, posIdx, instrumentId);
       if (alt) {
         return {
+          degree,
           chord,
           intervalMap,
           voicing: clipVoicingToRange(alt, rowBaseFret, rowHighFret),
         };
       }
 
-      return { chord, intervalMap, voicing: null };
+      return { degree, chord, intervalMap, voicing: null };
     });
 
     const label = rowBaseFret === 1 ? 'Open position' : `Position ${rowBaseFret}`;
@@ -249,16 +254,17 @@ function buildRows(
       const fw = nativeRow.fretWindow;
       const highFret = synBase + fw - 1;
 
-      const items: ChordRowItem[] = allVoicings.map(({ chord, intervalMap }) => {
+      const items: ChordRowItem[] = allVoicings.map(({ chord, intervalMap }, degree) => {
         const v = findVoicingForRange(chord.root, chord.type, synBase, highFret, undefined, instrumentId);
         if (v) {
           return {
+            degree,
             chord,
             intervalMap,
             voicing: clipVoicingToRange(v, synBase, highFret),
           };
         }
-        return { chord, intervalMap, voicing: null };
+        return { degree, chord, intervalMap, voicing: null };
       });
 
       const hasAny = items.some((x) => x.voicing !== null);
@@ -380,7 +386,7 @@ function ModeChordsInner({ tuning, instrumentId = 'guitar', initialRoot, onRootC
           </Stack>
         </Group>
 
-        <Stack gap={4} mb="lg">
+        <Stack gap={4} mb="xl">
           <Text size="sm" fw={500}>
             Rows: {rowRange[0]}–{rowRange[1]}
           </Text>
@@ -399,29 +405,40 @@ function ModeChordsInner({ tuning, instrumentId = 'guitar', initialRoot, onRootC
 
       {/* Printable content */}
       <div className={styles.printContent}>
-        <Title order={3} mb="xs" className={styles.pageTitle}>
+        <Title order={3} mb="md" className={styles.pageTitle}>
           {rootDisplay} Major — Diatonic Chords
         </Title>
 
         {rows.slice(rowRange[0] - 1, rowRange[1]).map((row, idx) => (
           <div
             key={row.posIdx}
-            className={`${styles.rowSection}${idx === 3 ? ` ${styles.page2Start}` : ''}`}
+            className={styles.rowSection}
           >
             {/* Repeat the page title at the top of the 2nd printed page */}
             {idx === 3 && (
-              <Title order={3} mb="xs" className={styles.pageTitleContinued}>
+              <Title order={3} mb="xs" className={`${styles.pageTitleContinued} ${styles.page2Start}`}>
                 {rootDisplay} Major — Diatonic Chords (cont.)
               </Title>
             )}
-            <p className={styles.rowHeader}>{row.label}</p>
+            {/* Row header — one cell per column for swim lane continuity */}
+            {row.items.map(({ degree }, i) => (
+              <div
+                key={`hdr-${i}`}
+                className={`${styles.rowHeaderCell}${degree % 2 === 1 ? ` ${styles.chordCardEven}` : ''}`}
+              >
+                {i === 0 && <span className={styles.rowHeaderText}>{row.label}</span>}
+              </div>
+            ))}
             <div className={styles.chordsRow}>
-              {row.items.map(({ chord, intervalMap, voicing }) => {
-                if (!voicing) return null;
+              {row.items.map(({ degree, chord, intervalMap, voicing }) => {
+                const cardClass = degree % 2 === 1
+                  ? `${styles.chordCard} ${styles.chordCardEven}`
+                  : styles.chordCard;
+                if (!voicing) return <div key={chord.root} className={cardClass} />;
                 return (
-                  <div key={chord.root} className={styles.chordCard}>
+                  <div key={chord.root} className={cardClass}>
                     <p className={styles.chordLabel} data-testid="mode-chord-label">
-                      {formatDiatonicLabel(chord.root, chord.type)}
+                      {formatDiatonicLabel(degree, chord.root, chord.type)}
                     </p>
                     <ChordBox
                       voicing={voicing}

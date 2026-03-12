@@ -21,7 +21,7 @@ export const CB_STRING_SPACING = 22;
 export const CB_FRET_SPACING = 24;
 
 /** Left margin (room for "Nfr" position label). */
-export const CB_LEFT_MARGIN = 24;
+export const CB_LEFT_MARGIN = 30;
 
 /** Right margin. */
 export const CB_RIGHT_MARGIN = 8;

@@ -37,8 +37,8 @@ describe('ChordBox', () => {
         <ChordBox voicing={AM_VOICING} tuning={GUITAR_TUNING} fretWindow={4} />,
       );
       const svg = container.querySelector('svg');
-      // width: CB_LEFT_MARGIN(24) + 5*CB_STRING_SPACING(22) + CB_RIGHT_MARGIN(8) = 142
-      expect(Number(svg?.getAttribute('width'))).toBe(142);
+      // width: CB_LEFT_MARGIN(30) + 5*CB_STRING_SPACING(22) + CB_RIGHT_MARGIN(8) = 148
+      expect(Number(svg?.getAttribute('width'))).toBe(148);
       // height: CB_TOP_MARGIN(8) + CB_INDICATOR_HEIGHT(28) + 4*CB_FRET_SPACING(24) + CB_BOTTOM_MARGIN(10) = 142
       expect(Number(svg?.getAttribute('height'))).toBe(142);
     });

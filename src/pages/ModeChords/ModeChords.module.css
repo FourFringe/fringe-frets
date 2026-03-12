@@ -3,16 +3,19 @@
 }
 
 .printContent {
-  /* shown during print */
+  display: grid;
+  grid-template-columns: repeat(7, auto);
+  justify-content: start;
 }
 
 .pageTitle {
-  /* used in print version */
+  grid-column: 1 / -1;
 }
 
 .pageTitleContinued {
   /* Only visible in print — page 2 header */
   display: none;
+  grid-column: 1 / -1;
 }
 
 .page2Start {
@@ -20,11 +23,12 @@
 }
 
 .rowSection {
-  margin-bottom: 32px;
+  display: contents;
 }
 
 .rowHeader {
-  margin: 0 0 12px;
+  grid-column: 1 / -1;
+  margin: 20px 0 12px;
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -32,21 +36,48 @@
   color: var(--mantine-color-dimmed);
 }
 
+.rowHeaderCell {
+  padding: 20px 8px 4px;
+}
+
+.rowHeaderText {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--mantine-color-dimmed);
+  white-space: nowrap;
+}
+
 .chordsRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-start;
+  display: contents;
 }
 
 .chordCard {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 4px 8px;
+}
+
+.chordCardEven {
+  position: relative;
+  background: linear-gradient(to right, transparent 11px, rgba(255, 255, 255, 0.04) 11px);
+}
+
+.chordCardEven::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -11px;
+  width: 11px;
+  background: rgba(255, 255, 255, 0.04);
+  pointer-events: none;
 }
 
 .chordLabel {
-  margin: 0 0 10px;
+  margin: 8px 0 4px;
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
@@ -73,22 +104,31 @@
   }
 
   .chordsRow {
-    flex-wrap: nowrap;
-    gap: 8px;
+    display: contents;
+  }
+
+  .chordCardEven {
+    background: linear-gradient(to right, transparent 11px, rgba(0, 0, 0, 0.05) 11px);
+  }
+
+  .chordCardEven::after {
+    background: rgba(0, 0, 0, 0.05);
   }
 
   .pageTitleContinued {
     display: block;
   }
 
-  /* Reduce vertical spacing so 3 rows fit on one landscape page */
-  .rowSection {
-    margin-bottom: 12px;
-    break-inside: avoid;
+  .rowHeader {
+    margin: 8px 0 4px;
   }
 
-  .rowHeader {
-    margin: 0 0 4px;
+  .rowHeaderCell {
+    padding: 8px 8px 2px;
+  }
+
+  .rowHeaderText {
+    font-size: 0.7rem;
   }
 
   .chordLabel {
@@ -97,7 +137,7 @@
   }
 
   .pageTitle {
-    margin-bottom: 4px;
+    margin-bottom: 8px;
   }
 
   /* Hard page break before the 4th visible row */

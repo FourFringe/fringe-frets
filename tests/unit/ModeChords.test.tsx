@@ -108,13 +108,13 @@ describe('ModeChords', () => {
     expect(boxes.length).toBeGreaterThanOrEqual(6);
   });
 
-  it('shows chord labels in "root qualifier" format for C major', () => {
+  it('shows chord labels in "degree. (root qualifier)" format for C major', () => {
     renderModeChords({ initialRoot: 'C' });
     const labels = screen.getAllByTestId('mode-chord-label').map((el) => el.textContent);
-    expect(labels).toContain('D min');
-    expect(labels).toContain('A min');
-    expect(labels).toContain('B dim');
-    expect(labels).toContain('C maj');
+    expect(labels).toContain('II. (D min)');
+    expect(labels).toContain('VI. (A min)');
+    expect(labels).toContain('VII. (B dim)');
+    expect(labels).toContain('I. (C maj)');
   });
 
   it('shows the major-scale header for C major', () => {
@@ -125,8 +125,8 @@ describe('ModeChords', () => {
   it('shows different chord labels after changing to G major', async () => {
     renderModeChords({ initialRoot: 'G' });
     const labels = screen.getAllByTestId('mode-chord-label').map((el) => el.textContent);
-    expect(labels).toContain('A min');
-    expect(labels).toContain('E min');
+    expect(labels).toContain('II. (A min)');
+    expect(labels).toContain('III. (B min)');
   });
 
   it('calls onRootChange when supplied — verifies initialRoot propagation', () => {
@@ -136,7 +136,7 @@ describe('ModeChords', () => {
     renderModeChords({ initialRoot: 'G', onRootChange });
     // G major labels include A min, B min, E min, F♯ dim
     const labels = screen.getAllByTestId('mode-chord-label').map((el) => el.textContent);
-    expect(labels).toContain('A min');
+    expect(labels).toContain('II. (A min)');
   });
 
   it('shows placeholder for non-chord instrument (bass)', () => {
