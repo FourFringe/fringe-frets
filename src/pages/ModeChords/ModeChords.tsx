@@ -174,28 +174,29 @@ function buildRows(
   }
 
   // ── Synthetic rows beyond chords-db positions ──────────────────────────
-  // Continue up the neck in ~4-fret steps from the last native row's end.
+  // Reuse the native row baseFrets shifted up an octave (+12) so chord
+  // shapes repeat naturally.  This avoids dead-fret gaps near fret 12.
   if (rows.length > 0 && rows.length < MAX_ROWS) {
-    const lastRow = rows[rows.length - 1];
-    // Start the next synthetic row just above where the last native row ended
-    let nextBase = (lastRow.items
-      .filter((x) => x.voicing !== null)
-      .reduce((mx, x) => {
-        const span = voicingFretSpan(x.voicing!);
-        return span ? Math.max(mx, span.maxFret) : mx;
-      }, 0)) + 1;
-
     for (let synIdx = rows.length; synIdx < MAX_ROWS; synIdx++) {
-      const fw = 4;
-      const highFret = nextBase + fw - 1;
+      // Map back to the corresponding native row and shift +12
+      const nativeRow = rows[synIdx - maxPositions];
+      if (!nativeRow) break;
+
+      // Derive the baseFret from the native row label
+      const nativeBase = nativeRow.items
+        .filter((x) => x.voicing !== null)
+        .reduce((lo, x) => Math.min(lo, x.voicing!.baseFret), Infinity);
+      const synBase = (nativeBase === Infinity ? 1 : nativeBase) + 12;
+      const fw = nativeRow.fretWindow;
+      const highFret = synBase + fw - 1;
 
       const items: ChordRowItem[] = allVoicings.map(({ chord, intervalMap }) => {
-        const v = findVoicingForRange(chord.root, chord.type, nextBase, highFret);
+        const v = findVoicingForRange(chord.root, chord.type, synBase, highFret);
         if (v) {
           return {
             chord,
             intervalMap,
-            voicing: clipVoicingToRange(v, nextBase, highFret),
+            voicing: clipVoicingToRange(v, synBase, highFret),
           };
         }
         return { chord, intervalMap, voicing: null };
@@ -204,8 +205,7 @@ function buildRows(
       const hasAny = items.some((x) => x.voicing !== null);
       if (!hasAny) break;
 
-      rows.push({ posIdx: synIdx, label: `Position ${nextBase}`, items, fretWindow: fw });
-      nextBase = highFret + 1;
+      rows.push({ posIdx: synIdx, label: `Position ${synBase}`, items, fretWindow: fw });
     }
   }
 

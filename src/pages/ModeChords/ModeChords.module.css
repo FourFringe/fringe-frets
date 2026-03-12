@@ -104,4 +104,9 @@
   .page2Start {
     break-before: page;
   }
+
+  /* Make fret position label readable in print */
+  :global(.cb-position-label) {
+    fill: #000 !important;
+  }
 }

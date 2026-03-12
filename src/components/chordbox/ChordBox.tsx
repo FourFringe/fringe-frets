@@ -1,5 +1,6 @@
 import type { ChordVoicing } from '../../services/chordVoicing';
 import { noteAtPosition } from '../../services/chordVoicing';
+import { Note } from 'tonal';
 import type { DotLabelMode } from '../fretboard/FretboardDots';
 import {
   CB_WIRE_WIDTH,
@@ -123,6 +124,7 @@ export function ChordBox({
     voicing.baseFret > 1 ? (
       <text
         key="pos-label"
+        className="cb-position-label"
         x={cbStringX(0) - 4}
         y={cbDotCY(1)}
         fill={textColor}
@@ -143,7 +145,8 @@ export function ChordBox({
     const cx = cbStringX(i);
     const iy = cbIndicatorY();
     const noteName = noteAtPosition(tuning[i], fret);
-    const isRoot = root !== undefined && noteName === root;
+    const isRoot = root !== undefined && noteName !== null &&
+      Note.chroma(noteName) === Note.chroma(root);
 
     if (fret === null) {
       // Muted: draw ✕
@@ -179,7 +182,7 @@ export function ChordBox({
       } else if (labelMode === 'interval' && noteName && intervalMap) {
         openLabel = intervalMap[noteName] ?? noteName;
       }
-      const openFontSize = openLabel && openLabel.length > 2 ? 7 : 8;
+      const openFontSize = openLabel && openLabel.length > 2 ? 8 : 9;
       indicators.push(
         <g key={`ind-${i}`} data-testid={`chord-box-open-${i}`}>
           <circle
@@ -224,7 +227,7 @@ export function ChordBox({
       label = intervalMap[noteName] ?? noteName;
     }
 
-    const fontSize = label && label.length > 2 ? 7 : 8;
+    const fontSize = label && label.length > 2 ? 8 : 9;
 
     dots.push(
       <g key={`dot-${i}`} data-testid={`chord-box-dot-${i}`}>
