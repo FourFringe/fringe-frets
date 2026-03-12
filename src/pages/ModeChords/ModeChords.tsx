@@ -137,7 +137,12 @@ function buildRows(
       .map((v) => voicingFretSpan(v))
       .filter((s): s is { minFret: number; maxFret: number } => s !== null);
 
-    const { baseFret: rowBaseFret, fretWindow } = findConsensusFretRange(spans);
+    // Row 1 (posIdx 0) always shows the open position / nut.
+    const consensus = findConsensusFretRange(spans);
+    const rowBaseFret = posIdx === 0 ? 1 : consensus.baseFret;
+    // When forcing baseFret=1, expand fretWindow to still cover the consensus range.
+    const consensusHigh = consensus.baseFret + consensus.fretWindow - 1;
+    const fretWindow = Math.max(consensus.fretWindow, consensusHigh - rowBaseFret + 1);
     const rowHighFret = rowBaseFret + fretWindow - 1;
 
     // Build each chord item, finding the best-fitting voicing for the range
@@ -186,7 +191,9 @@ function buildRows(
       const nativeBase = nativeRow.items
         .filter((x) => x.voicing !== null)
         .reduce((lo, x) => Math.min(lo, x.voicing!.baseFret), Infinity);
-      const synBase = (nativeBase === Infinity ? 1 : nativeBase) + 12;
+      // Open position (baseFret 1) includes open strings (fret 0) which shift
+      // to fret 12, so the octave row should start at 12, not 13.
+      const synBase = nativeBase === 1 ? 12 : (nativeBase === Infinity ? 13 : nativeBase + 12);
       const fw = nativeRow.fretWindow;
       const highFret = synBase + fw - 1;
 
