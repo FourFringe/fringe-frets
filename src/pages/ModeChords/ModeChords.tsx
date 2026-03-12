@@ -1,12 +1,11 @@
 import { useState, useMemo } from 'react';
 import { Title, Text, Select, Group, Stack, RangeSlider } from '@mantine/core';
 import { SegmentedControl } from '@mantine/core';
-import { Note } from 'tonal';
 import { getDiatonicChords } from '../../services/chords';
 import { buildIntervalMap } from '../../services/intervals';
 import { enharmonicDisplayLabel } from '../../services/notes';
-import { findVoicingInWindow } from '../../services/chordVoicing';
 import type { ChordVoicing } from '../../services/chordVoicing';
+import { lookupVoicings } from '../../services/chordsDb';
 import { ChordBox } from '../../components/chordbox';
 import type { DotLabelMode } from '../../components/fretboard';
 import styles from './ModeChords.module.css';
@@ -27,27 +26,6 @@ function formatDiatonicLabel(root: string, type: string): string {
   return `${formatNoteDisplay(root)} ${qualifier}`;
 }
 
-/**
- * Mute contiguous open strings at the bottom of the chord that are not the
- * chord root.  Stops as soon as it encounters the root or a fretted string.
- * This prevents non-root bass notes (e.g. E on low-E for a C chord) from
- * showing as playable open strings.
- */
-function muteOpenNonRootStrings(
-  voicing: ChordVoicing,
-  chordRoot: string,
-  tuning: string[],
-): ChordVoicing {
-  const newStrings = [...voicing.strings];
-  for (let i = 0; i < newStrings.length; i++) {
-    if (newStrings[i] !== 0) break; // fretted or already muted — stop
-    const openPc = Note.get(tuning[i]).pc;
-    if (openPc === chordRoot) break; // root string — keep and stop
-    newStrings[i] = null; // non-root open — mute
-  }
-  return { ...voicing, strings: newStrings };
-}
-
 interface ChordRowItem {
   chord: ReturnType<typeof getDiatonicChords>[number];
   intervalMap: Record<string, string>;
@@ -55,56 +33,70 @@ interface ChordRowItem {
 }
 
 interface ChordRow {
+  posIdx: number;
   label: string;
   items: ChordRowItem[];
   fretWindow: number;
-  /** The lowest fret shown — next row should search from here + fretWindow. */
-  searchEnd: number;
 }
 
 /**
- * Build one row of 7 chord voicings, normalised to a shared fret window.
- * Searches for each chord's lowest voicing whose baseFret >= searchFrom.
- * Returns the row data plus where the next search should start.
+ * Build all rows of chord voicings from the chords-db curated positions.
+ *
+ * Each chord in chords-db typically has 4 positions at different neck locations.
+ * We group them into rows by position index (0 = first/open, 1 = second, etc.),
+ * then compute a shared baseFret and dynamic fret window per row so all 7
+ * chord diagrams in a row align visually.
  */
-function buildClosedRow(
+function buildRows(
   diatonic: ReturnType<typeof getDiatonicChords>,
-  tuning: string[],
-  searchFrom: number,
-): ChordRow {
-  const raw = diatonic.map((chord) => {
-    const intervalMap = buildIntervalMap(chord.notes, chord.intervals);
-    let voicing: ChordVoicing | null = null;
-    for (let start = searchFrom; start <= 20 && voicing === null; start++) {
-      voicing = findVoicingInWindow(chord.notes, tuning, start, 4);
-    }
-    return { chord, intervalMap, voicing };
-  });
-
-  const valid = raw.filter((x) => x.voicing !== null);
-  const sharedBase =
-    valid.length > 0 ? Math.min(...valid.map((x) => x.voicing!.baseFret)) : searchFrom;
-  const maxFret =
-    valid.length > 0
-      ? Math.max(
-          ...valid.flatMap((x) =>
-            x.voicing!.strings.filter((f): f is number => f !== null && f > 0),
-          ),
-        )
-      : sharedBase + 3;
-  const fretWindow = Math.max(4, maxFret - sharedBase + 1);
-
-  const items = raw.map((item) => ({
-    ...item,
-    voicing: item.voicing ? { ...item.voicing, baseFret: sharedBase } : null,
+): ChordRow[] {
+  // Look up all curated voicings for each chord
+  const allVoicings = diatonic.map((chord) => ({
+    chord,
+    intervalMap: buildIntervalMap(chord.notes, chord.intervals),
+    voicings: lookupVoicings(chord.root, chord.type),
   }));
 
-  return {
-    label: `Position ${sharedBase}`,
-    items,
-    fretWindow,
-    searchEnd: sharedBase + fretWindow,
-  };
+  // Determine the max number of positions any chord has
+  const maxPositions = Math.max(...allVoicings.map((v) => v.voicings.length), 0);
+  if (maxPositions === 0) return [];
+
+  const rows: ChordRow[] = [];
+
+  for (let posIdx = 0; posIdx < maxPositions; posIdx++) {
+    // Pick the posIdx-th voicing for each chord (or null if fewer positions).
+    // Each voicing keeps its own baseFret so ChordBox can independently show
+    // the nut (baseFret 1) or a position label (baseFret > 1).
+    const items: ChordRowItem[] = allVoicings.map(({ chord, intervalMap, voicings }) => ({
+      chord,
+      intervalMap,
+      voicing: voicings[posIdx] ?? null,
+    }));
+
+    const valid = items.filter((x) => x.voicing !== null);
+    if (valid.length === 0) continue;
+
+    // Compute a shared fretWindow so all diagrams in the row are the same
+    // height.  Each voicing's span is relative to its own baseFret.
+    const perVoicingSpans = valid.map((x) => {
+      const v = x.voicing!;
+      const fretted = v.strings.filter((f): f is number => f !== null && f > 0);
+      if (fretted.length === 0) return 4; // all-open chord — 4 frets is fine
+      const maxFret = Math.max(...fretted);
+      return maxFret - v.baseFret + 1;
+    });
+    const fretWindow = Math.max(4, ...perVoicingSpans);
+
+    // Row label is based on the lowest baseFret across all voicings
+    const minBase = Math.min(...valid.map((x) => x.voicing!.baseFret));
+    const label = minBase === 1
+      ? 'Open position'
+      : `Position ${minBase}`;
+
+    rows.push({ posIdx, label, items, fretWindow });
+  }
+
+  return rows;
 }
 
 /** All 12 pitch classes as roots.
@@ -133,32 +125,13 @@ export function ModeChords({ tuning, initialRoot, onRootChange }: ModeChordsProp
 
   const { rows, rootDisplay } = useMemo(() => {
     const diatonic = getDiatonicChords(root);
-
-    // ── Row 1: open position ──────────────────────────────────────────────────
-    const openItems = diatonic.map((chord) => {
-      const intervalMap = buildIntervalMap(chord.notes, chord.intervals);
-      const raw = findVoicingInWindow(chord.notes, tuning, 1, 4);
-      const voicing = raw ? muteOpenNonRootStrings(raw, chord.root, tuning) : null;
-      return { chord, intervalMap, voicing };
-    });
-    const openRow = { label: 'Open position', items: openItems, fretWindow: 4, searchEnd: 2 };
-
-    // ── Rows 2-6: successive closed positions ─────────────────────────────────
-    // Each row starts searching from where the previous row's window ended so
-    // the voicings march up the neck without overlapping.
-    const closedRows: ChordRow[] = [];
-    let nextSearch = openRow.searchEnd;
-    for (let i = 0; i < 5; i++) {
-      const row = buildClosedRow(diatonic, tuning, nextSearch);
-      closedRows.push(row);
-      nextSearch = row.searchEnd;
-    }
+    const allRows = buildRows(diatonic);
 
     return {
-      rows: [openRow, ...closedRows],
+      rows: allRows,
       rootDisplay: enharmonicDisplayLabel(root) ?? root,
     };
-  }, [root, tuning]);
+  }, [root]);
 
   return (
     <div>
@@ -204,18 +177,11 @@ export function ModeChords({ tuning, initialRoot, onRootChange }: ModeChordsProp
             value={rowRange}
             onChange={setRowRange}
             min={1}
-            max={6}
+            max={Math.max(rows.length, 1)}
             minRange={1}
             step={1}
             w={200}
-            marks={[
-              { value: 1, label: '1' },
-              { value: 2, label: '2' },
-              { value: 3, label: '3' },
-              { value: 4, label: '4' },
-              { value: 5, label: '5' },
-              { value: 6, label: '6' },
-            ]}
+            marks={rows.map((_, i) => ({ value: i + 1, label: String(i + 1) }))}
           />
         </Stack>
       </div>
@@ -227,7 +193,7 @@ export function ModeChords({ tuning, initialRoot, onRootChange }: ModeChordsProp
         </Title>
 
         {rows.slice(rowRange[0] - 1, rowRange[1]).map((row) => (
-          <div key={row.label} className={styles.rowSection}>
+          <div key={row.posIdx} className={styles.rowSection}>
             <p className={styles.rowHeader}>{row.label}</p>
             <div className={styles.chordsRow}>
               {row.items.map(({ chord, intervalMap, voicing }) => {

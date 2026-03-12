@@ -735,6 +735,11 @@
   resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-14.6.1.tgz#13e09a32d7a8b7060fe38304788ebf4197cd2149"
   integrity sha512-vq7fv0rnt+QTXgPxr5Hjc210p6YKq2kmdziLgnsZGgLJ9e6VAShx1pACLuRjd/AS/sr7phAR58OIIpf0LlmQNw==
 
+"@tombatossals/chords-db@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@tombatossals/chords-db/-/chords-db-0.5.1.tgz#bd112b4cefb751933433ad1f7fe143e7fdf56ef8"
+  integrity sha512-5kLLtwOxmnFfpVTYfYiw1Q22NJ8msb5JeyDLre09XnUFx2l6KSeqPtJQPsVPOak4BUenlsv/j2H65KBVhB6qgQ==
+
 "@tonaljs/abc-notation@4.9.1":
   version "4.9.1"
   resolved "https://registry.yarnpkg.com/@tonaljs/abc-notation/-/abc-notation-4.9.1.tgz#392a770b19b703a82c9f403605e3925f17149f04"
