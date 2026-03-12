@@ -6,6 +6,7 @@ import { ModeChords } from '../../src/pages/ModeChords/ModeChords';
 import { getDiatonicChords } from '../../src/services/chords';
 
 const DEFAULT_TUNING = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
+const BASS_TUNING = ['E1', 'A1', 'D2', 'G2'];
 
 function renderModeChords(props: Partial<Parameters<typeof ModeChords>[0]> = {}) {
   return render(
@@ -136,5 +137,11 @@ describe('ModeChords', () => {
     // G major labels include A min, B min, E min, F♯ dim
     const labels = screen.getAllByTestId('mode-chord-label').map((el) => el.textContent);
     expect(labels).toContain('A min');
+  });
+
+  it('shows placeholder for non-chord instrument (bass)', () => {
+    renderModeChords({ tuning: BASS_TUNING, instrumentId: 'bass', initialRoot: 'C' });
+    expect(screen.getByText(/chord voicings are not available for bass/i)).toBeTruthy();
+    expect(screen.queryAllByTestId('chord-box')).toHaveLength(0);
   });
 });

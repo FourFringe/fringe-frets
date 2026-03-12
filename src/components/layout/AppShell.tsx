@@ -10,10 +10,17 @@ interface AppShellProps {
   onUpdateSettings: (patch: Partial<UserSettings>) => void;
 }
 
-const instrumentOptions = Object.values(INSTRUMENTS).map((inst) => ({
-  value: inst.id,
-  label: inst.name,
-}));
+const instrumentOptions = [
+  { group: 'Instruments', items: [
+    { value: 'guitar', label: 'Guitar' },
+    { value: 'mandolin', label: 'Mandolin' },
+  ]},
+  { group: 'Scales Only', items: [
+    { value: 'bass', label: 'Bass' },
+    { value: 'violin', label: 'Violin' },
+    { value: 'cello', label: 'Cello' },
+  ]},
+];
 
 export function AppShell({ settings, onUpdateSettings }: AppShellProps) {
   const handleInstrumentChange = (value: string | null) => {
@@ -70,7 +77,7 @@ export function AppShell({ settings, onUpdateSettings }: AppShellProps) {
               `${styles.navLink} ${styles.navLinkIndent} ${isActive ? styles.navLinkActive : ''}`
             }
           >
-            Scale Modes
+            Mode Scales
           </NavLink>
           <NavLink
             to="/mode-chords"

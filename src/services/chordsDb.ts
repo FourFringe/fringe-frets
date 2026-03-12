@@ -37,9 +37,8 @@ const SUFFIX_MAP: Record<string, string> = {
 
 /**
  * Map our root note names to chords-db key names.
- * chords-db uses: C, Csharp, D, Eb, E, F, Fsharp, G, Ab, A, Bb, B
- * (Note: C# and F# are stored as "Csharp" and "Fsharp" in the JSON keys.)
- * tonal may return enharmonic variants like D#, G#, A# — map those too.
+ *
+ * Guitar uses: C, Csharp, D, Eb, E, F, Fsharp, G, Ab, A, Bb, B
  */
 function normalizeKey(root: string): string {
   const KEY_MAP: Record<string, string> = {
@@ -80,13 +79,17 @@ function toChordVoicing(pos: ChordsDbPosition): ChordVoicing {
  *
  * @param root  Pitch-class root, e.g. 'C', 'F#', 'Bb'
  * @param type  Chord type name (tonal naming), e.g. 'major', 'minor', 'diminished'
+ * @param instrumentId  Instrument to look up voicings for (default: 'guitar')
  * @returns     Array of ChordVoicing, sorted by baseFret ascending. Empty if not found.
  */
-export function lookupVoicings(root: string, type: string): ChordVoicing[] {
+export function lookupVoicings(root: string, type: string, instrumentId = 'guitar'): ChordVoicing[] {
+  if (instrumentId !== 'guitar') return [];
+  const db = guitarDb;
+
   const key = normalizeKey(root);
   const suffix = SUFFIX_MAP[type] ?? type;
 
-  const chords = (guitarDb.chords as Record<string, ChordsDbChord[]>)[key];
+  const chords = (db.chords as Record<string, ChordsDbChord[]>)[key];
   if (!chords) return [];
 
   const match = chords.find((c) => c.suffix === suffix);
@@ -104,8 +107,9 @@ export function lookupVoicingNear(
   root: string,
   type: string,
   targetFret: number,
+  instrumentId = 'guitar',
 ): ChordVoicing | null {
-  const all = lookupVoicings(root, type);
+  const all = lookupVoicings(root, type, instrumentId);
   if (all.length === 0) return null;
 
   // Find the first voicing at or above targetFret
@@ -162,8 +166,9 @@ export function findVoicingForRange(
   lowFret: number,
   highFret: number,
   preferPosIdx?: number,
+  instrumentId = 'guitar',
 ): ChordVoicing | null {
-  const native = lookupVoicings(root, type);
+  const native = lookupVoicings(root, type, instrumentId);
   if (native.length === 0) return null;
 
   // Build candidate list: native positions + octave-shifted versions

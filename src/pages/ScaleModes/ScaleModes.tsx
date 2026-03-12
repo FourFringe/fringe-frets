@@ -172,7 +172,7 @@ export function ScaleModes({
           step={1}
           mb="lg"
           w={400}
-          marks={SLIDER_MARKS}
+          marks={SLIDER_MARKS.filter((m) => m.value <= fretCount)}
         />
       </div>
 

@@ -5,9 +5,11 @@ import { getDiatonicChords } from '../../services/chords';
 import { buildIntervalMap } from '../../services/intervals';
 import { enharmonicDisplayLabel } from '../../services/notes';
 import type { ChordVoicing } from '../../services/chordVoicing';
+import { findVoicingInWindow } from '../../services/chordVoicing';
 import { lookupVoicings, voicingFretSpan, findVoicingForRange } from '../../services/chordsDb';
 import { ChordBox } from '../../components/chordbox';
 import type { DotLabelMode } from '../../components/fretboard';
+import { INSTRUMENTS, CHORD_INSTRUMENT_IDS } from '../../models/instrument';
 import styles from './ModeChords.module.css';
 
 /**
@@ -95,6 +97,48 @@ function clipVoicingToRange(
 }
 
 /**
+ * Build rows using the algorithmic voicing engine for instruments without
+ * curated chords-db data (bass, mandolin, violin, cello, etc.).
+ *
+ * Generates voicings at several fret windows across the neck, grouped
+ * into rows with a shared fret range — mirroring the curated layout.
+ */
+function buildAlgorithmicRows(
+  diatonic: ReturnType<typeof getDiatonicChords>,
+  tuning: string[],
+): ChordRow[] {
+  // Minimum strings that must sound to count as a usable voicing.
+  const minStrings = Math.min(tuning.length, 3);
+
+  const windowSize = 4;
+  const rows: ChordRow[] = [];
+
+  for (let start = 1; start <= 12 && rows.length < MAX_ROWS; start++) {
+    const items: ChordRowItem[] = diatonic.map((chord) => {
+      const intervalMap = buildIntervalMap(chord.notes, chord.intervals);
+      const voicing = findVoicingInWindow(chord.notes, tuning, start, windowSize);
+
+      // Reject voicings with too few sounding strings
+      if (voicing) {
+        const active = voicing.strings.filter((f) => f !== null).length;
+        if (active < minStrings) return { chord, intervalMap, voicing: null };
+      }
+
+      return { chord, intervalMap, voicing };
+    });
+
+    // Only include the row if at least one chord produced a valid voicing
+    const hasAny = items.some((x) => x.voicing !== null);
+    if (!hasAny) continue;
+
+    const label = start === 1 ? 'Open position' : `Position ${start}`;
+    rows.push({ posIdx: rows.length, label, items, fretWindow: windowSize });
+  }
+
+  return rows;
+}
+
+/**
  * Build all rows of chord voicings from the chords-db curated positions.
  *
  * Each chord in chords-db typically has 4 positions at different neck locations.
@@ -110,12 +154,20 @@ function clipVoicingToRange(
  */
 function buildRows(
   diatonic: ReturnType<typeof getDiatonicChords>,
+  instrumentId: string,
+  tuning: string[],
 ): ChordRow[] {
+  const hasCuratedDb = instrumentId === 'guitar';
+
+  if (!hasCuratedDb) {
+    return buildAlgorithmicRows(diatonic, tuning);
+  }
+
   // Look up all curated voicings for each chord
   const allVoicings = diatonic.map((chord) => ({
     chord,
     intervalMap: buildIntervalMap(chord.notes, chord.intervals),
-    voicings: lookupVoicings(chord.root, chord.type),
+    voicings: lookupVoicings(chord.root, chord.type, instrumentId),
   }));
 
   // Determine the max number of positions any chord has
@@ -162,7 +214,7 @@ function buildRows(
       }
 
       // Natural doesn't fit — search all positions for this chord
-      const alt = findVoicingForRange(chord.root, chord.type, rowBaseFret, rowHighFret, posIdx);
+      const alt = findVoicingForRange(chord.root, chord.type, rowBaseFret, rowHighFret, posIdx, instrumentId);
       if (alt) {
         return {
           chord,
@@ -198,7 +250,7 @@ function buildRows(
       const highFret = synBase + fw - 1;
 
       const items: ChordRowItem[] = allVoicings.map(({ chord, intervalMap }) => {
-        const v = findVoicingForRange(chord.root, chord.type, synBase, highFret);
+        const v = findVoicingForRange(chord.root, chord.type, synBase, highFret, undefined, instrumentId);
         if (v) {
           return {
             chord,
@@ -232,13 +284,42 @@ const MAX_ROWS = 6;
 
 interface ModeChordsProps {
   tuning: string[];
+  instrumentId?: string;
   initialRoot?: string;
   onRootChange?: (root: string) => void;
   initialRowRange?: [number, number];
   onRowRangeChange?: (range: [number, number]) => void;
 }
 
-export function ModeChords({ tuning, initialRoot, onRootChange, initialRowRange, onRowRangeChange }: ModeChordsProps) {
+export function ModeChords({ tuning, instrumentId = 'guitar', initialRoot, onRootChange, initialRowRange, onRowRangeChange }: ModeChordsProps) {
+  const instrumentName = INSTRUMENTS[instrumentId]?.name ?? instrumentId;
+
+  if (!CHORD_INSTRUMENT_IDS.has(instrumentId)) {
+    return (
+      <div>
+        <Title order={1} mb="xs">
+          Mode Chords
+        </Title>
+        <Text c="dimmed" mt="md">
+          Chord voicings are not available for {instrumentName}. Try the Scale Explorer or Mode Scales pages instead.
+        </Text>
+      </div>
+    );
+  }
+
+  return (
+    <ModeChordsInner
+      tuning={tuning}
+      instrumentId={instrumentId}
+      initialRoot={initialRoot}
+      onRootChange={onRootChange}
+      initialRowRange={initialRowRange}
+      onRowRangeChange={onRowRangeChange}
+    />
+  );
+}
+
+function ModeChordsInner({ tuning, instrumentId = 'guitar', initialRoot, onRootChange, initialRowRange, onRowRangeChange }: ModeChordsProps) {
   const [root, setRootState] = useState(initialRoot ?? 'C');
   const [labelMode, setLabelMode] = useState<DotLabelMode>('note');
   const [rowRange, setRowRangeState] = useState<[number, number]>(initialRowRange ?? [1, 3]);
@@ -255,13 +336,13 @@ export function ModeChords({ tuning, initialRoot, onRootChange, initialRowRange,
 
   const { rows, rootDisplay } = useMemo(() => {
     const diatonic = getDiatonicChords(root);
-    const allRows = buildRows(diatonic);
+    const allRows = buildRows(diatonic, instrumentId, tuning);
 
     return {
       rows: allRows,
       rootDisplay: enharmonicDisplayLabel(root) ?? root,
     };
-  }, [root]);
+  }, [root, instrumentId, tuning]);
 
   return (
     <div>

@@ -14,19 +14,19 @@ export const INSTRUMENTS: Record<string, Instrument> = {
     defaultTuning: ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
     fretCount: 24,
   },
+  bass: {
+    id: 'bass',
+    name: 'Bass',
+    strings: 4,
+    defaultTuning: ['E1', 'A1', 'D2', 'G2'],
+    fretCount: 24,
+  },
   mandolin: {
     id: 'mandolin',
     name: 'Mandolin',
     strings: 4,
     defaultTuning: ['G3', 'D4', 'A4', 'E5'],
     fretCount: 17,
-  },
-  ukulele: {
-    id: 'ukulele',
-    name: 'Ukulele',
-    strings: 4,
-    defaultTuning: ['G4', 'C4', 'E4', 'A4'],
-    fretCount: 15,
   },
   violin: {
     id: 'violin',
@@ -45,3 +45,6 @@ export const INSTRUMENTS: Record<string, Instrument> = {
 };
 
 export const DEFAULT_INSTRUMENT_ID = 'guitar';
+
+/** Instruments that support chord voicing pages (Chord Explorer, Mode Chords). */
+export const CHORD_INSTRUMENT_IDS = new Set(['guitar', 'mandolin']);

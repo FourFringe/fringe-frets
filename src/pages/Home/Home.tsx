@@ -69,7 +69,7 @@ export function Home() {
           <br />
           <strong>Locrian</strong> (VII) &mdash; diminished, unstable and tense.
         </Text>
-        <Text fw={600} mb={4}>Scale Modes</Text>
+        <Text fw={600} mb={4}>Mode Scales</Text>
         <Text size="sm" c="dimmed" mb="sm">
           Shows all seven modes of a selected key as fretboard diagrams side by side, so
           you can compare their note patterns and see how each mode shifts across the neck.

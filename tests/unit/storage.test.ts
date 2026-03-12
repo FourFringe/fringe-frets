@@ -13,12 +13,12 @@ describe('storage service', () => {
   });
 
   it('round-trips settings through save and load', () => {
-    const custom = { ...DEFAULT_SETTINGS, instrumentId: 'ukulele', fretCount: 15 };
+    const custom = { ...DEFAULT_SETTINGS, instrumentId: 'bass', fretCount: 24 };
     saveSettings(custom);
 
     const loaded = loadSettings();
-    expect(loaded.instrumentId).toBe('ukulele');
-    expect(loaded.fretCount).toBe(15);
+    expect(loaded.instrumentId).toBe('bass');
+    expect(loaded.fretCount).toBe(24);
   });
 
   it('clears saved settings', () => {

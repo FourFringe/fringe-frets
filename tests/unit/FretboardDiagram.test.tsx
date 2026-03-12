@@ -143,15 +143,15 @@ describe('FretboardDiagram', () => {
     expect(rects.length).toBe(0);
   });
 
-  it('works with a 4-string instrument (ukulele)', () => {
-    const ukeTuning = ['G4', 'C4', 'E4', 'A4'];
-    render(<FretboardDiagram tuning={ukeTuning} fretCount={5} />);
+  it('works with a 4-string instrument (mandolin)', () => {
+    const mandolinTuning = ['G3', 'D4', 'A4', 'E5'];
+    render(<FretboardDiagram tuning={mandolinTuning} fretCount={5} />);
     const svg = screen.getByTestId('fretboard-diagram');
     expect(svg).toBeTruthy();
     // Check string labels exist
     const labels = screen.getByTestId('fretboard-labels');
     expect(labels.textContent).toContain('G');
-    expect(labels.textContent).toContain('C');
+    expect(labels.textContent).toContain('D');
     expect(labels.textContent).toContain('A');
   });
 

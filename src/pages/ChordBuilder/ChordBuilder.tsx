@@ -11,6 +11,7 @@ import {
   Paper,
 } from '@mantine/core';
 import { NOTE_NAMES } from '../../models/music';
+import { INSTRUMENTS, CHORD_INSTRUMENT_IDS } from '../../models/instrument';
 import { getCommonChordTypes, getChord, getChordNotes } from '../../services/chords';
 import { buildIntervalMap } from '../../services/intervals';
 import { suggestVoicings } from '../../services/chordVoicing';
@@ -20,6 +21,7 @@ import type { DotLabelMode } from '../../components/fretboard';
 interface ChordBuilderProps {
   tuning: string[];
   fretCount: number;
+  instrumentId?: string;
 }
 
 interface ChordSlotState {
@@ -188,7 +190,26 @@ function ChordSlotCard({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export function ChordExplorer({ tuning }: ChordBuilderProps) {
+export function ChordExplorer({ tuning, instrumentId = 'guitar' }: ChordBuilderProps) {
+  const instrumentName = INSTRUMENTS[instrumentId]?.name ?? instrumentId;
+
+  if (!CHORD_INSTRUMENT_IDS.has(instrumentId)) {
+    return (
+      <div>
+        <Title order={1} mb="xs">
+          Chord Explorer
+        </Title>
+        <Text c="dimmed" mt="md">
+          Chord voicings are not available for {instrumentName}. Try the Scale Explorer or Mode Scales pages instead.
+        </Text>
+      </div>
+    );
+  }
+
+  return <ChordExplorerInner tuning={tuning} />;
+}
+
+function ChordExplorerInner({ tuning }: { tuning: string[] }) {
   const [slots, setSlots] = useState<ChordSlotState[]>(DEFAULT_SLOTS);
   const [labelMode, setLabelMode] = useState<DotLabelMode>('note');
   const [fretWindow, setFretWindow] = useState(4);

@@ -138,7 +138,7 @@ export function ScaleExplorer({ tuning, fretCount, initialFretRange, onFretRange
             { value: 19, label: '19' },
             { value: 21, label: '21' },
             { value: 24, label: '24' },
-          ]}
+          ].filter((m) => m.value <= fretCount)}
         />
       </div>
 

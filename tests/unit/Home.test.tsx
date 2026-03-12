@@ -26,7 +26,7 @@ describe('Home', () => {
     renderHome();
     expect(screen.getByText('Scale Explorer')).toBeTruthy();
     expect(screen.getByText('Chord Explorer')).toBeTruthy();
-    expect(screen.getByText('Scale Modes')).toBeTruthy();
+    expect(screen.getByText('Mode Scales')).toBeTruthy();
     expect(screen.getByText('Mode Chords')).toBeTruthy();
   });
 });

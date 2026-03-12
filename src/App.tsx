@@ -55,6 +55,7 @@ export default function App() {
             element={
               <ModeChords
                 tuning={settings.tuning ?? instrument.defaultTuning}
+                instrumentId={settings.instrumentId}
                 initialRoot={settings.modeChordsRoot}
                 onRootChange={(r) => updateSettings({ modeChordsRoot: r })}
                 initialRowRange={settings.modeChordsRowRange}
@@ -68,6 +69,7 @@ export default function App() {
               <ChordExplorer
                 tuning={settings.tuning ?? instrument.defaultTuning}
                 fretCount={settings.fretCount}
+                instrumentId={settings.instrumentId}
               />
             }
           />
