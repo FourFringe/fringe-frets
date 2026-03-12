@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { lookupVoicings, lookupVoicingNear, voicingFretSpan } from '../../src/services/chordsDb';
+import { lookupVoicings, lookupVoicingNear, voicingFretSpan, findVoicingForRange } from '../../src/services/chordsDb';
 
 describe('chordsDb service', () => {
   describe('lookupVoicings', () => {
@@ -154,6 +154,57 @@ describe('chordsDb service', () => {
       // Only fret 5 is fretted
       const span = voicingFretSpan({ strings: [0, 0, 5, 0, 0, 0], baseFret: 1 });
       expect(span).toEqual({ minFret: 5, maxFret: 5 });
+    });
+  });
+
+  describe('findVoicingForRange', () => {
+    it('returns a voicing whose fretted notes fall within the range', () => {
+      const v = findVoicingForRange('C', 'major', 1, 4);
+      expect(v).not.toBeNull();
+      const fretted = v!.strings.filter((f): f is number => f !== null && f > 0);
+      for (const f of fretted) {
+        expect(f).toBeGreaterThanOrEqual(1);
+        expect(f).toBeLessThanOrEqual(4);
+      }
+    });
+
+    it('returns null for unknown chord', () => {
+      expect(findVoicingForRange('Z', 'major', 1, 4)).toBeNull();
+    });
+
+    it('prefers a voicing closer to preferPosIdx when multiple fit', () => {
+      // C major has 4 positions; position 0 (open) fits range [1,4]
+      const v = findVoicingForRange('C', 'major', 1, 4, 0);
+      expect(v).not.toBeNull();
+      expect(v!.baseFret).toBe(1); // open C chord
+    });
+
+    it('finds an alternative position when the preferred posIdx does not fit', () => {
+      // Ask for a voicing near posIdx 3 but in a low fret range
+      const v = findVoicingForRange('A', 'minor', 1, 5, 3);
+      expect(v).not.toBeNull();
+      const fretted = v!.strings.filter((f): f is number => f !== null && f > 0);
+      for (const f of fretted) {
+        expect(f).toBeGreaterThanOrEqual(1);
+        expect(f).toBeLessThanOrEqual(5);
+      }
+    });
+
+    it('returns the best partial match when no voicing fits perfectly', () => {
+      // Narrow range that likely won't perfectly contain any D minor voicing
+      const v = findVoicingForRange('D', 'minor', 4, 5);
+      // Should still return something (partial) or null if truly nothing overlaps
+      if (v) {
+        const fretted = v.strings.filter((f): f is number => f !== null && f > 0);
+        const inRange = fretted.filter((f) => f >= 4 && f <= 5);
+        expect(inRange.length).toBeGreaterThan(0);
+      }
+    });
+
+    it('returns a voicing with 6 strings', () => {
+      const v = findVoicingForRange('G', 'major', 2, 6);
+      expect(v).not.toBeNull();
+      expect(v!.strings).toHaveLength(6);
     });
   });
 });

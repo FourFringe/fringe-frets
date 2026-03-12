@@ -128,3 +128,64 @@ export function voicingFretSpan(
   if (fretted.length === 0) return null;
   return { minFret: Math.min(...fretted), maxFret: Math.max(...fretted) };
 }
+
+/**
+ * Find the best curated voicing for a chord whose fretted notes fall within
+ * [lowFret, highFret].
+ *
+ * 1. Perfect fits (all fretted notes in range) are preferred, with ties broken
+ *    by proximity to `preferPosIdx`.
+ * 2. If no perfect fit exists, the voicing with the most in-range notes wins.
+ * 3. Returns null only when no voicing has any fretted note in range.
+ */
+export function findVoicingForRange(
+  root: string,
+  type: string,
+  lowFret: number,
+  highFret: number,
+  preferPosIdx?: number,
+): ChordVoicing | null {
+  const all = lookupVoicings(root, type);
+  if (all.length === 0) return null;
+
+  interface Scored {
+    voicing: ChordVoicing;
+    posIdx: number;
+    inRangeCount: number;
+    totalFretted: number;
+    allFit: boolean;
+  }
+
+  const scored: Scored[] = all.map((v, idx) => {
+    const fretted = v.strings.filter((f): f is number => f !== null && f > 0);
+    const inRange = fretted.filter((f) => f >= lowFret && f <= highFret);
+    return {
+      voicing: v,
+      posIdx: idx,
+      totalFretted: fretted.length,
+      inRangeCount: inRange.length,
+      allFit: fretted.length > 0 && inRange.length === fretted.length,
+    };
+  });
+
+  const byProximity = (a: Scored, b: Scored) => {
+    const dA = preferPosIdx !== undefined ? Math.abs(a.posIdx - preferPosIdx) : a.posIdx;
+    const dB = preferPosIdx !== undefined ? Math.abs(b.posIdx - preferPosIdx) : b.posIdx;
+    return dA - dB;
+  };
+
+  // Perfect fits first
+  const perfect = scored.filter((s) => s.allFit);
+  if (perfect.length > 0) {
+    perfect.sort(byProximity);
+    return perfect[0].voicing;
+  }
+
+  // Best partial fit: most in-range notes, then closest posIdx
+  scored.sort((a, b) => {
+    if (b.inRangeCount !== a.inRangeCount) return b.inRangeCount - a.inRangeCount;
+    return byProximity(a, b);
+  });
+
+  return scored[0].inRangeCount > 0 ? scored[0].voicing : null;
+}

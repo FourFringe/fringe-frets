@@ -5,7 +5,7 @@ import { getDiatonicChords } from '../../services/chords';
 import { buildIntervalMap } from '../../services/intervals';
 import { enharmonicDisplayLabel } from '../../services/notes';
 import type { ChordVoicing } from '../../services/chordVoicing';
-import { lookupVoicings } from '../../services/chordsDb';
+import { lookupVoicings, voicingFretSpan, findVoicingForRange } from '../../services/chordsDb';
 import { ChordBox } from '../../components/chordbox';
 import type { DotLabelMode } from '../../components/fretboard';
 import styles from './ModeChords.module.css';
@@ -40,12 +40,73 @@ interface ChordRow {
 }
 
 /**
+ * Determine a shared baseFret and fretWindow for a row of voicings.
+ *
+ * Tries fretWindows of 4 and 5, and every candidate baseFret, picking the
+ * combination that fits (all fretted notes within range) the most voicings.
+ * Ties prefer the narrower window, then the lower baseFret.
+ */
+function findConsensusFretRange(
+  spans: { minFret: number; maxFret: number }[],
+): { baseFret: number; fretWindow: number } {
+  if (spans.length === 0) return { baseFret: 1, fretWindow: 4 };
+
+  const minFrets = spans.map((s) => s.minFret);
+  const lo = Math.min(...minFrets);
+  const hi = Math.max(...minFrets);
+
+  let bestBase = lo;
+  let bestCount = 0;
+  let bestWindow = 4;
+
+  for (const fw of [4, 5]) {
+    for (let base = lo; base <= hi; base++) {
+      const top = base + fw - 1;
+      const count = spans.filter((s) => s.minFret >= base && s.maxFret <= top).length;
+      if (count > bestCount || (count === bestCount && fw < bestWindow)) {
+        bestBase = base;
+        bestCount = count;
+        bestWindow = fw;
+      }
+    }
+  }
+
+  return { baseFret: bestBase, fretWindow: bestWindow };
+}
+
+/**
+ * Clip a voicing to a fret range: any fretted note outside [lowFret, highFret]
+ * is muted.  Open strings and already-muted strings are left unchanged.
+ * baseFret is set to `lowFret` so the diagram aligns with the row.
+ */
+function clipVoicingToRange(
+  voicing: ChordVoicing,
+  lowFret: number,
+  highFret: number,
+): ChordVoicing {
+  return {
+    baseFret: lowFret,
+    strings: voicing.strings.map((f) => {
+      if (f === null || f === 0) return f;
+      if (f >= lowFret && f <= highFret) return f;
+      return null;
+    }),
+  };
+}
+
+/**
  * Build all rows of chord voicings from the chords-db curated positions.
  *
  * Each chord in chords-db typically has 4 positions at different neck locations.
  * We group them into rows by position index (0 = first/open, 1 = second, etc.),
- * then compute a shared baseFret and dynamic fret window per row so all 7
- * chord diagrams in a row align visually.
+ * then compute a *shared* baseFret and fretWindow for the entire row so every
+ * chord diagram displays the same fret range — making it easy to see how the
+ * chords relate spatially on the neck.
+ *
+ * When a chord's natural voicing at a given posIdx doesn't fit the consensus
+ * fret range, we search the chord's other curated positions for one that does.
+ * If no position fits perfectly, the best partial match is clipped (out-of-range
+ * notes are muted).
  */
 function buildRows(
   diatonic: ReturnType<typeof getDiatonicChords>,
@@ -64,35 +125,50 @@ function buildRows(
   const rows: ChordRow[] = [];
 
   for (let posIdx = 0; posIdx < maxPositions; posIdx++) {
-    // Pick the posIdx-th voicing for each chord (or null if fewer positions).
-    // Each voicing keeps its own baseFret so ChordBox can independently show
-    // the nut (baseFret 1) or a position label (baseFret > 1).
-    const items: ChordRowItem[] = allVoicings.map(({ chord, intervalMap, voicings }) => ({
-      chord,
-      intervalMap,
-      voicing: voicings[posIdx] ?? null,
-    }));
+    // Gather natural voicings at this position index
+    const naturalVoicings = allVoicings.map(({ voicings }) => voicings[posIdx] ?? null);
+    const validVoicings = naturalVoicings.filter((v): v is ChordVoicing => v !== null);
 
-    const valid = items.filter((x) => x.voicing !== null);
-    if (valid.length === 0) continue;
+    if (validVoicings.length === 0) continue;
 
-    // Compute a shared fretWindow so all diagrams in the row are the same
-    // height.  Each voicing's span is relative to its own baseFret.
-    const perVoicingSpans = valid.map((x) => {
-      const v = x.voicing!;
-      const fretted = v.strings.filter((f): f is number => f !== null && f > 0);
-      if (fretted.length === 0) return 4; // all-open chord — 4 frets is fine
-      const maxFret = Math.max(...fretted);
-      return maxFret - v.baseFret + 1;
+    // Compute fret spans (fretted notes only) for the consensus calculation
+    const spans = validVoicings
+      .map((v) => voicingFretSpan(v))
+      .filter((s): s is { minFret: number; maxFret: number } => s !== null);
+
+    const { baseFret: rowBaseFret, fretWindow } = findConsensusFretRange(spans);
+    const rowHighFret = rowBaseFret + fretWindow - 1;
+
+    // Build each chord item, finding the best-fitting voicing for the range
+    const items: ChordRowItem[] = allVoicings.map(({ chord, intervalMap, voicings }) => {
+      const natural = voicings[posIdx] ?? null;
+
+      // Check if the natural voicing fits entirely in the row's fret range
+      if (natural) {
+        const span = voicingFretSpan(natural);
+        if (!span || (span.minFret >= rowBaseFret && span.maxFret <= rowHighFret)) {
+          return {
+            chord,
+            intervalMap,
+            voicing: { ...natural, baseFret: rowBaseFret },
+          };
+        }
+      }
+
+      // Natural doesn't fit — search all positions for this chord
+      const alt = findVoicingForRange(chord.root, chord.type, rowBaseFret, rowHighFret, posIdx);
+      if (alt) {
+        return {
+          chord,
+          intervalMap,
+          voicing: clipVoicingToRange(alt, rowBaseFret, rowHighFret),
+        };
+      }
+
+      return { chord, intervalMap, voicing: null };
     });
-    const fretWindow = Math.max(4, ...perVoicingSpans);
 
-    // Row label is based on the lowest baseFret across all voicings
-    const minBase = Math.min(...valid.map((x) => x.voicing!.baseFret));
-    const label = minBase === 1
-      ? 'Open position'
-      : `Position ${minBase}`;
-
+    const label = rowBaseFret === 1 ? 'Open position' : `Position ${rowBaseFret}`;
     rows.push({ posIdx, label, items, fretWindow });
   }
 
