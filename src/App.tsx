@@ -57,6 +57,8 @@ export default function App() {
                 tuning={settings.tuning ?? instrument.defaultTuning}
                 initialRoot={settings.modeChordsRoot}
                 onRootChange={(r) => updateSettings({ modeChordsRoot: r })}
+                initialRowRange={settings.modeChordsRowRange}
+                onRowRangeChange={(rr) => updateSettings({ modeChordsRowRange: rr })}
               />
             }
           />

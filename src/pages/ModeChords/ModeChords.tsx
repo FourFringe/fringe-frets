@@ -124,6 +124,7 @@ function buildRows(
 
   const rows: ChordRow[] = [];
 
+  // ── Native chords-db rows ──────────────────────────────────────────────
   for (let posIdx = 0; posIdx < maxPositions; posIdx++) {
     // Gather natural voicings at this position index
     const naturalVoicings = allVoicings.map(({ voicings }) => voicings[posIdx] ?? null);
@@ -172,6 +173,42 @@ function buildRows(
     rows.push({ posIdx, label, items, fretWindow });
   }
 
+  // ── Synthetic rows beyond chords-db positions ──────────────────────────
+  // Continue up the neck in ~4-fret steps from the last native row's end.
+  if (rows.length > 0 && rows.length < MAX_ROWS) {
+    const lastRow = rows[rows.length - 1];
+    // Start the next synthetic row just above where the last native row ended
+    let nextBase = (lastRow.items
+      .filter((x) => x.voicing !== null)
+      .reduce((mx, x) => {
+        const span = voicingFretSpan(x.voicing!);
+        return span ? Math.max(mx, span.maxFret) : mx;
+      }, 0)) + 1;
+
+    for (let synIdx = rows.length; synIdx < MAX_ROWS; synIdx++) {
+      const fw = 4;
+      const highFret = nextBase + fw - 1;
+
+      const items: ChordRowItem[] = allVoicings.map(({ chord, intervalMap }) => {
+        const v = findVoicingForRange(chord.root, chord.type, nextBase, highFret);
+        if (v) {
+          return {
+            chord,
+            intervalMap,
+            voicing: clipVoicingToRange(v, nextBase, highFret),
+          };
+        }
+        return { chord, intervalMap, voicing: null };
+      });
+
+      const hasAny = items.some((x) => x.voicing !== null);
+      if (!hasAny) break;
+
+      rows.push({ posIdx: synIdx, label: `Position ${nextBase}`, items, fretWindow: fw });
+      nextBase = highFret + 1;
+    }
+  }
+
   return rows;
 }
 
@@ -183,20 +220,30 @@ const rootOptions = ROOT_NOTES.map((n) => ({
   label: `${enharmonicDisplayLabel(n) ?? n} Major`,
 }));
 
+/** Maximum number of rows the slider supports (2 printed pages × 3 rows). */
+const MAX_ROWS = 6;
+
 interface ModeChordsProps {
   tuning: string[];
   initialRoot?: string;
   onRootChange?: (root: string) => void;
+  initialRowRange?: [number, number];
+  onRowRangeChange?: (range: [number, number]) => void;
 }
 
-export function ModeChords({ tuning, initialRoot, onRootChange }: ModeChordsProps) {
+export function ModeChords({ tuning, initialRoot, onRootChange, initialRowRange, onRowRangeChange }: ModeChordsProps) {
   const [root, setRootState] = useState(initialRoot ?? 'C');
   const [labelMode, setLabelMode] = useState<DotLabelMode>('note');
-  const [rowRange, setRowRange] = useState<[number, number]>([1, 3]);
+  const [rowRange, setRowRangeState] = useState<[number, number]>(initialRowRange ?? [1, 3]);
 
   function setRoot(r: string) {
     setRootState(r);
     onRootChange?.(r);
+  }
+
+  function setRowRange(range: [number, number]) {
+    setRowRangeState(range);
+    onRowRangeChange?.(range);
   }
 
   const { rows, rootDisplay } = useMemo(() => {
@@ -253,11 +300,11 @@ export function ModeChords({ tuning, initialRoot, onRootChange }: ModeChordsProp
             value={rowRange}
             onChange={setRowRange}
             min={1}
-            max={Math.max(rows.length, 1)}
+            max={MAX_ROWS}
             minRange={1}
             step={1}
             w={200}
-            marks={rows.map((_, i) => ({ value: i + 1, label: String(i + 1) }))}
+            marks={Array.from({ length: MAX_ROWS }, (_, i) => ({ value: i + 1, label: String(i + 1) }))}
           />
         </Stack>
       </div>
@@ -268,8 +315,17 @@ export function ModeChords({ tuning, initialRoot, onRootChange }: ModeChordsProp
           {rootDisplay} Major — Diatonic Chords
         </Title>
 
-        {rows.slice(rowRange[0] - 1, rowRange[1]).map((row) => (
-          <div key={row.posIdx} className={styles.rowSection}>
+        {rows.slice(rowRange[0] - 1, rowRange[1]).map((row, idx) => (
+          <div
+            key={row.posIdx}
+            className={`${styles.rowSection}${idx === 3 ? ` ${styles.page2Start}` : ''}`}
+          >
+            {/* Repeat the page title at the top of the 2nd printed page */}
+            {idx === 3 && (
+              <Title order={3} mb="xs" className={styles.pageTitleContinued}>
+                {rootDisplay} Major — Diatonic Chords (cont.)
+              </Title>
+            )}
             <p className={styles.rowHeader}>{row.label}</p>
             <div className={styles.chordsRow}>
               {row.items.map(({ chord, intervalMap, voicing }) => {

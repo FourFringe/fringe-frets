@@ -10,6 +10,15 @@
   /* used in print version */
 }
 
+.pageTitleContinued {
+  /* Only visible in print — page 2 header */
+  display: none;
+}
+
+.page2Start {
+  /* print-only class; see @media print below */
+}
+
 .rowSection {
   margin-bottom: 32px;
 }
@@ -53,11 +62,14 @@
 
   @page {
     size: landscape;
-    margin: 1cm;
-  }
+    margin: 0.8cm;
 
-  .printContent {
-    page-break-inside: avoid;
+    /* Page numbers bottom-center */
+    @bottom-center {
+      content: counter(page) " / " counter(pages);
+      font-size: 9pt;
+      color: #888;
+    }
   }
 
   .chordsRow {
@@ -65,9 +77,31 @@
     gap: 8px;
   }
 
-  /* Page break after the 3rd row — rows 1-3 on page 1, 4-6 on page 2.
-     The h3 title is child 1, so the 3rd rowSection is nth-child(4). */
-  .rowSection:nth-child(4) {
-    page-break-after: always;
+  .pageTitleContinued {
+    display: block;
+  }
+
+  /* Reduce vertical spacing so 3 rows fit on one landscape page */
+  .rowSection {
+    margin-bottom: 12px;
+    break-inside: avoid;
+  }
+
+  .rowHeader {
+    margin: 0 0 4px;
+  }
+
+  .chordLabel {
+    margin: 0 0 4px;
+    font-size: 0.85rem;
+  }
+
+  .pageTitle {
+    margin-bottom: 4px;
+  }
+
+  /* Hard page break before the 4th visible row */
+  .page2Start {
+    break-before: page;
   }
 }

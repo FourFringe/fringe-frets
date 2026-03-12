@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { lookupVoicings, lookupVoicingNear, voicingFretSpan, findVoicingForRange } from '../../src/services/chordsDb';
+import { lookupVoicings, lookupVoicingNear, voicingFretSpan, findVoicingForRange, shiftVoicingOctave } from '../../src/services/chordsDb';
 
 describe('chordsDb service', () => {
   describe('lookupVoicings', () => {
@@ -205,6 +205,49 @@ describe('chordsDb service', () => {
       const v = findVoicingForRange('G', 'major', 2, 6);
       expect(v).not.toBeNull();
       expect(v!.strings).toHaveLength(6);
+    });
+
+    it('finds an octave-shifted voicing for frets above 12', () => {
+      // C major open position is frets [null,3,2,0,1,0] — shifted becomes [null,15,14,12,13,12]
+      const v = findVoicingForRange('C', 'major', 12, 16);
+      expect(v).not.toBeNull();
+      const fretted = v!.strings.filter((f): f is number => f !== null && f > 0);
+      expect(fretted.length).toBeGreaterThan(0);
+      for (const f of fretted) {
+        expect(f).toBeGreaterThanOrEqual(12);
+        expect(f).toBeLessThanOrEqual(16);
+      }
+    });
+
+    it('octave-shifted voicings have no open strings', () => {
+      const v = findVoicingForRange('C', 'major', 12, 16);
+      expect(v).not.toBeNull();
+      const hasOpen = v!.strings.some((f) => f === 0);
+      expect(hasOpen).toBe(false);
+    });
+  });
+
+  describe('shiftVoicingOctave', () => {
+    it('shifts all frets up by 12', () => {
+      const shifted = shiftVoicingOctave({ strings: [null, 3, 2, 0, 1, 0], baseFret: 1 });
+      expect(shifted.strings).toEqual([null, 15, 14, 12, 13, 12]);
+      expect(shifted.baseFret).toBe(13);
+    });
+
+    it('preserves muted strings', () => {
+      const shifted = shiftVoicingOctave({ strings: [null, null, 5, 5, 5, null], baseFret: 3 });
+      expect(shifted.strings).toEqual([null, null, 17, 17, 17, null]);
+    });
+
+    it('converts open strings to fret 12', () => {
+      const shifted = shiftVoicingOctave({ strings: [0, 0, 0, 0, 0, 0], baseFret: 1 });
+      expect(shifted.strings).toEqual([12, 12, 12, 12, 12, 12]);
+      expect(shifted.baseFret).toBe(13);
+    });
+
+    it('shifts baseFret by 12', () => {
+      const shifted = shiftVoicingOctave({ strings: [3, 3, 5, 5, 5, 3], baseFret: 3 });
+      expect(shifted.baseFret).toBe(15);
     });
   });
 });

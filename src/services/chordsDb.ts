@@ -130,8 +130,26 @@ export function voicingFretSpan(
 }
 
 /**
+ * Shift a voicing up one octave (+12 frets).
+ * Open strings become fret 12; muted strings stay muted.
+ * baseFret is shifted by 12 as well.
+ */
+export function shiftVoicingOctave(voicing: ChordVoicing): ChordVoicing {
+  return {
+    baseFret: voicing.baseFret + 12,
+    strings: voicing.strings.map((f) => {
+      if (f === null) return null;
+      return f + 12;
+    }),
+  };
+}
+
+/**
  * Find the best curated voicing for a chord whose fretted notes fall within
  * [lowFret, highFret].
+ *
+ * Searches both the native chords-db positions and octave-shifted (+12 fret)
+ * versions, so chords above fret 12 can reuse lower-position shapes.
  *
  * 1. Perfect fits (all fretted notes in range) are preferred, with ties broken
  *    by proximity to `preferPosIdx`.
@@ -145,8 +163,14 @@ export function findVoicingForRange(
   highFret: number,
   preferPosIdx?: number,
 ): ChordVoicing | null {
-  const all = lookupVoicings(root, type);
-  if (all.length === 0) return null;
+  const native = lookupVoicings(root, type);
+  if (native.length === 0) return null;
+
+  // Build candidate list: native positions + octave-shifted versions
+  const candidates = [
+    ...native,
+    ...native.map(shiftVoicingOctave),
+  ];
 
   interface Scored {
     voicing: ChordVoicing;
@@ -156,12 +180,14 @@ export function findVoicingForRange(
     allFit: boolean;
   }
 
-  const scored: Scored[] = all.map((v, idx) => {
+  const scored: Scored[] = candidates.map((v, idx) => {
+    // posIdx wraps so shifted voicings map back to their original position index
+    const posIdx = idx % native.length;
     const fretted = v.strings.filter((f): f is number => f !== null && f > 0);
     const inRange = fretted.filter((f) => f >= lowFret && f <= highFret);
     return {
       voicing: v,
-      posIdx: idx,
+      posIdx,
       totalFretted: fretted.length,
       inRangeCount: inRange.length,
       allFit: fretted.length > 0 && inRange.length === fretted.length,
