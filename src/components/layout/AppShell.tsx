@@ -44,45 +44,41 @@ export function AppShell({ settings, onUpdateSettings }: AppShellProps) {
           >
             Home
           </NavLink>
+
+          <div className={styles.navSection}>Explore</div>
           <NavLink
             to="/scales"
             className={({ isActive }) =>
-              `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+              `${styles.navLink} ${styles.navLinkIndent} ${isActive ? styles.navLinkActive : ''}`
             }
           >
             Scale Explorer
           </NavLink>
           <NavLink
-            to="/modes"
+            to="/chords"
             className={({ isActive }) =>
-              `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+              `${styles.navLink} ${styles.navLinkIndent} ${isActive ? styles.navLinkActive : ''}`
             }
           >
-            Mode Scales
+            Chord Explorer
+          </NavLink>
+
+          <div className={styles.navSection}>Modes</div>
+          <NavLink
+            to="/modes"
+            className={({ isActive }) =>
+              `${styles.navLink} ${styles.navLinkIndent} ${isActive ? styles.navLinkActive : ''}`
+            }
+          >
+            Scale Modes
           </NavLink>
           <NavLink
             to="/mode-chords"
             className={({ isActive }) =>
-              `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+              `${styles.navLink} ${styles.navLinkIndent} ${isActive ? styles.navLinkActive : ''}`
             }
           >
             Mode Chords
-          </NavLink>
-          <NavLink
-            to="/chords"
-            className={({ isActive }) =>
-              `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
-            }
-          >
-            Chord Builder
-          </NavLink>
-          <NavLink
-            to="/tabs"
-            className={({ isActive }) =>
-              `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
-            }
-          >
-            Tab Viewer
           </NavLink>
         </div>
 

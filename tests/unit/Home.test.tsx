@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
 import { MantineProvider } from '@mantine/core';
 import { Home } from '../../src/pages/Home/Home';
 
@@ -8,9 +7,7 @@ describe('Home', () => {
   const renderHome = () =>
     render(
       <MantineProvider>
-        <MemoryRouter>
-          <Home />
-        </MemoryRouter>
+        <Home />
       </MantineProvider>,
     );
 
@@ -19,19 +16,17 @@ describe('Home', () => {
     expect(screen.getByText('Welcome to Fringe Frets')).toBeTruthy();
   });
 
-  it('renders all four feature cards', () => {
+  it('renders section headings', () => {
     renderHome();
-    expect(screen.getByText('Scale Explorer')).toBeTruthy();
-    expect(screen.getByText('Chord Builder')).toBeTruthy();
-    expect(screen.getByText('Tab Viewer')).toBeTruthy();
-    expect(screen.getByText('Multi-Instrument')).toBeTruthy();
+    expect(screen.getByText('Explore')).toBeTruthy();
+    expect(screen.getByText('Modes')).toBeTruthy();
   });
 
-  it('renders descriptions for each feature', () => {
+  it('renders tool descriptions', () => {
     renderHome();
-    expect(screen.getByText(/Visualize any scale/)).toBeTruthy();
-    expect(screen.getByText(/Build and explore chord/)).toBeTruthy();
-    expect(screen.getByText(/View and print tablature/)).toBeTruthy();
-    expect(screen.getByText(/Switch between guitar/)).toBeTruthy();
+    expect(screen.getByText('Scale Explorer')).toBeTruthy();
+    expect(screen.getByText('Chord Explorer')).toBeTruthy();
+    expect(screen.getByText('Scale Modes')).toBeTruthy();
+    expect(screen.getByText('Mode Chords')).toBeTruthy();
   });
 });

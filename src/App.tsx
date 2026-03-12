@@ -4,7 +4,7 @@ import { Home } from './pages/Home/Home';
 import { ScaleExplorer } from './pages/ScaleExplorer/ScaleExplorer';
 import { ScaleModes } from './pages/ScaleModes/ScaleModes';
 import { ModeChords } from './pages/ModeChords/ModeChords';
-import { ChordBuilder } from './pages/ChordBuilder/ChordBuilder';
+import { ChordExplorer } from './pages/ChordBuilder/ChordBuilder';
 import { TabViewer } from './pages/TabViewer/TabViewer';
 import { useSettings } from './hooks/useSettings';
 import { useInstrument } from './hooks/useInstrument';
@@ -65,7 +65,7 @@ export default function App() {
           <Route
             path="chords"
             element={
-              <ChordBuilder
+              <ChordExplorer
                 tuning={settings.tuning ?? instrument.defaultTuning}
                 fretCount={settings.fretCount}
               />

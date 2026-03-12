@@ -1,75 +1,87 @@
-import { useNavigate } from 'react-router';
-import { Title, Text, SimpleGrid, Card, ThemeIcon } from '@mantine/core';
-
-const features = [
-  {
-    title: 'Scale Explorer',
-    description:
-      'Visualize any scale on the fretboard. See note positions, intervals, and patterns across all strings.',
-    icon: '🎵',
-    color: 'blue',
-    path: '/scales',
-  },
-  {
-    title: 'Chord Builder',
-    description:
-      'Build and explore chord voicings. See how chords are constructed and find fingering positions on the fretboard.',
-    icon: '🎸',
-    color: 'violet',
-    path: '/chords',
-  },
-  {
-    title: 'Tab Viewer',
-    description:
-      'View and print tablature with fretboard diagrams. Create printable music sheets for practice.',
-    icon: '📄',
-    color: 'teal',
-    path: '/tabs',
-  },
-  {
-    title: 'Multi-Instrument',
-    description:
-      'Switch between guitar, mandolin, ukulele, violin, and cello. All tools adapt to the selected instrument.',
-    icon: '🎻',
-    color: 'orange',
-    path: null,
-  },
-] as const;
+import { Title, Text, Divider, Stack } from '@mantine/core';
 
 export function Home() {
-  const navigate = useNavigate();
-
   return (
-    <div>
-      <Title order={1} mb="xs">
-        Welcome to Fringe Frets
-      </Title>
-      <Text c="dimmed" mb="xl">
-        Explore the fretboard, learn scales, and build chord voicings for stringed instruments.
-      </Text>
+    <Stack gap="lg" maw={720}>
+      <div>
+        <Title order={1} mb="xs">
+          Welcome to Fringe Frets
+        </Title>
+        <Text c="dimmed">
+          An interactive toolkit for exploring scales, chords, and modes on fretted
+          instruments. Use the sidebar to navigate between tools.
+        </Text>
+      </div>
 
-      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-        {features.map((feat) => (
-          <Card
-            key={feat.title}
-            padding="lg"
-            radius="md"
-            withBorder
-            style={feat.path ? { cursor: 'pointer' } : undefined}
-            onClick={feat.path ? () => navigate(feat.path!) : undefined}
-          >
-            <ThemeIcon size="xl" radius="md" variant="light" color={feat.color} mb="sm">
-              {feat.icon}
-            </ThemeIcon>
-            <Title order={3} mb="xs">
-              {feat.title}
-            </Title>
-            <Text size="sm" c="dimmed">
-              {feat.description}
-            </Text>
-          </Card>
-        ))}
-      </SimpleGrid>
-    </div>
+      <Divider />
+
+      <div>
+        <Title order={2} mb="xs">
+          Explore
+        </Title>
+        <Text mb="sm">
+          The Explorer tools let you freely pick any root note and visualize it on the
+          fretboard.
+        </Text>
+        <Text fw={600} mb={4}>Scale Explorer</Text>
+        <Text size="sm" c="dimmed" mb="sm">
+          Choose a scale type and root note, then see every note position mapped across
+          the fretboard. Useful for learning scale shapes, seeing how patterns connect
+          across strings, and understanding intervals within a scale.
+        </Text>
+        <Text fw={600} mb={4}>Chord Explorer</Text>
+        <Text size="sm" c="dimmed">
+          Build a chord progression by adding chord cards. Each card shows a voicing
+          diagram that you can cycle through to find different fingering positions. Great
+          for comparing voicings, building practice progressions, and exploring chord
+          construction.
+        </Text>
+      </div>
+
+      <Divider />
+
+      <div>
+        <Title order={2} mb="xs">
+          Modes
+        </Title>
+        <Text mb="sm">
+          The Modes tools show how a single parent scale generates seven related scales
+          called <em>modes</em>.
+        </Text>
+        <Text size="sm" c="dimmed" mb="md">
+          Every major scale contains seven modes &mdash; each one starts on a different
+          degree of the parent scale and uses the same notes, but the shifted starting
+          point gives each mode its own character. For example, the C major scale
+          (C D E F G A B) produces these modes:
+        </Text>
+        <Text size="sm" c="dimmed" mb="md" style={{ paddingLeft: '1rem' }}>
+          <strong>Ionian</strong> (I) &mdash; the major scale itself, bright and resolved.
+          <br />
+          <strong>Dorian</strong> (II) &mdash; minor with a raised 6th, jazzy and smooth.
+          <br />
+          <strong>Phrygian</strong> (III) &mdash; minor with a flat 2nd, dark and Spanish-flavored.
+          <br />
+          <strong>Lydian</strong> (IV) &mdash; major with a raised 4th, dreamy and floating.
+          <br />
+          <strong>Mixolydian</strong> (V) &mdash; major with a flat 7th, bluesy and dominant.
+          <br />
+          <strong>Aeolian</strong> (VI) &mdash; the natural minor scale, melancholy.
+          <br />
+          <strong>Locrian</strong> (VII) &mdash; diminished, unstable and tense.
+        </Text>
+        <Text fw={600} mb={4}>Scale Modes</Text>
+        <Text size="sm" c="dimmed" mb="sm">
+          Shows all seven modes of a selected key as fretboard diagrams side by side, so
+          you can compare their note patterns and see how each mode shifts across the neck.
+        </Text>
+        <Text fw={600} mb={4}>Mode Chords</Text>
+        <Text size="sm" c="dimmed">
+          Displays the diatonic chords (triads built on each scale degree) for a selected
+          key, arranged in rows by fret position. This shows how the same set of chords
+          appears at different positions up the neck &mdash; useful for finding chord
+          voicings that sit close together for smooth transitions.
+        </Text>
+      </div>
+    </Stack>
   );
 }

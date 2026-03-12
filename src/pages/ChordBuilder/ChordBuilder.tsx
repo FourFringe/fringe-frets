@@ -188,7 +188,7 @@ function ChordSlotCard({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export function ChordBuilder({ tuning }: ChordBuilderProps) {
+export function ChordExplorer({ tuning }: ChordBuilderProps) {
   const [slots, setSlots] = useState<ChordSlotState[]>(DEFAULT_SLOTS);
   const [labelMode, setLabelMode] = useState<DotLabelMode>('note');
   const [fretWindow, setFretWindow] = useState(4);
@@ -224,7 +224,7 @@ export function ChordBuilder({ tuning }: ChordBuilderProps) {
   return (
     <div>
       <Title order={1} mb="xs">
-        Chord Builder
+        Chord Explorer
       </Title>
       <Text c="dimmed" mb="xl">
         Build a chord progression — each card shows a chord voicing you can cycle through.

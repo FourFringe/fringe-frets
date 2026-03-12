@@ -47,6 +47,20 @@
   background: var(--mantine-color-dark-5, #2c2e33);
 }
 
+.navLinkIndent {
+  padding-left: 1.25rem;
+}
+
+.navSection {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mantine-color-dark-2, #909296);
+  padding: 0.5rem 0.75rem 0.15rem;
+  margin-top: 0.25rem;
+}
+
 .navLinkActive {
   background: var(--mantine-color-blue-9, #1864ab);
   color: white;
