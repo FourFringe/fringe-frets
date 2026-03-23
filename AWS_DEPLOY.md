@@ -12,6 +12,11 @@ DNS (Hover) → CloudFront domain
 GitHub Actions → builds app → syncs dist/ to S3 → invalidates CloudFront cache
 ```
 
+A single React app is deployed to one S3 bucket and served by one CloudFront distribution. Both `frets.fourfringe.com` and `www.fourfringe.com` (plus `fourfringe.com` via Hover redirect) point to the same distribution. At runtime, the app checks `window.location.hostname` and renders different route trees:
+
+- **`frets.fourfringe.com`** — the full Fringe Frets app (scales, chords, modes, etc.)
+- **`www.fourfringe.com` / `fourfringe.com`** — a landing page for the Four Fringe domain
+
 **Why not use S3 static website hosting directly?**
 Directly exposing an S3 bucket as a static website is the old approach. It doesn't support HTTPS and is considered poor practice. The correct modern approach is a *private* S3 bucket fronted by CloudFront, which handles HTTPS, caching, and custom domains.
 
@@ -36,8 +41,9 @@ Directly exposing an S3 bucket as a static website is the old approach. It doesn
 
 1. In the AWS console, switch your region to **US East (N. Virginia) / us-east-1**
 2. Go to **Certificate Manager (ACM) → Request a certificate → Request a public certificate**
-3. Add your domain names, e.g.:
-   - `frets.fourfringe.com`
+3. Add your domain names — use a wildcard to cover all subdomains:
+   - `fourfringe.com`
+   - `*.fourfringe.com`
 4. Choose **DNS validation** and click **Request**
 5. Open the certificate and expand the domain — AWS shows you a CNAME record to add to your DNS to prove ownership
 
@@ -65,8 +71,12 @@ ACM polls for this record and flips the certificate to **Issued** within a few m
 2. **Origin domain**: click the field and select your S3 bucket from the dropdown (the entry ending in `.s3.amazonaws.com`, *not* the website endpoint ending in `.s3-website-...amazonaws.com`)
 3. **Origin access**: select **Origin access control settings (recommended)**
    - Click **Create new OAC**, accept defaults, click **Create**
-4. **Alternate domain names (CNAMEs)**: add `frets.fourfringe.com`
-5. Click **Create distribution**
+4. **Alternate domain names (CNAMEs)**: add all domains served by this distribution:
+   - `frets.fourfringe.com`
+   - `www.fourfringe.com`
+   - `fourfringe.com`
+5. **Custom SSL certificate**: select the ACM wildcard cert (`fourfringe.com` + `*.fourfringe.com`)
+6. Click **Create distribution**
 
 
 ### Apply the S3 bucket policy
@@ -118,10 +128,18 @@ Because this is a React single-page app (client-side routing), any URL that isn'
 ## Step 4 — DNS (Hover)
 
 1. Log in to Hover → **DNS** for your domain
-2. Add a **CNAME** record:
-   - **Hostname**: `frets`
-   - **Target Name**: your CloudFront domain, e.g. `d1234abcd.cloudfront.net`
-3. DNS propagation can take a few minutes to an hour
+2. Add CNAME records for each subdomain pointing to your CloudFront distribution domain (e.g. `d1234abcd.cloudfront.net`):
+
+| Type | Hostname | Target Name |
+|---|---|---|
+| CNAME | `frets` | `d1234abcd.cloudfront.net` |
+| CNAME | `www` | `d1234abcd.cloudfront.net` |
+
+3. For the apex domain (`fourfringe.com`), Hover does not support CNAME at `@`. Instead, use **Hover's URL Forwarding**:
+   - Go to the domain's **Forwarding** settings (not DNS)
+   - Forward `fourfringe.com` → `https://www.fourfringe.com` (301 redirect)
+   - Hover creates an A record pointing to their forwarding servers automatically
+4. DNS propagation can take a few minutes to an hour
 
 ---
 

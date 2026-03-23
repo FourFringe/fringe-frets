@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { AppShell } from './components/layout/AppShell';
 import { Home } from './pages/Home/Home';
+import { Landing } from './pages/Landing/Landing';
 import { ScaleExplorer } from './pages/ScaleExplorer/ScaleExplorer';
 import { ScaleModes } from './pages/ScaleModes/ScaleModes';
 import { ModeChords } from './pages/ModeChords/ModeChords';
@@ -9,9 +10,21 @@ import { TabViewer } from './pages/TabViewer/TabViewer';
 import { useSettings } from './hooks/useSettings';
 import { useInstrument } from './hooks/useInstrument';
 
+const isFretsDomain = window.location.hostname === 'frets.fourfringe.com';
+
 export default function App() {
   const { settings, updateSettings } = useSettings();
   const instrument = useInstrument(settings.instrumentId);
+
+  if (!isFretsDomain) {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route index element={<Landing />} />
+        </Routes>
+      </BrowserRouter>
+    );
+  }
 
   return (
     <BrowserRouter>
