@@ -10,13 +10,13 @@ import { TabViewer } from './pages/TabViewer/TabViewer';
 import { useSettings } from './hooks/useSettings';
 import { useInstrument } from './hooks/useInstrument';
 
-const isFretsDomain = window.location.hostname === 'frets.fourfringe.com';
+const isLandingDomain = window.location.hostname === 'www.fourfringe.com';
 
 export default function App() {
   const { settings, updateSettings } = useSettings();
   const instrument = useInstrument(settings.instrumentId);
 
-  if (!isFretsDomain) {
+  if (isLandingDomain) {
     return (
       <BrowserRouter>
         <Routes>
@@ -29,6 +29,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="landing" element={<Landing />} />
         <Route
           element={<AppShell settings={settings} onUpdateSettings={updateSettings} />}
         >
