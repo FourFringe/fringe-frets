@@ -18,6 +18,9 @@
 .positionLabel {
   text-align: center;
   white-space: nowrap;
+  /* Offset left to compensate for the SVG's asymmetric left margin (fret labels) */
+  margin-right: -40px;
+  font-size: 20px;
 }
 
 .printContent {
@@ -68,6 +71,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  .positionLabel {
+    margin-right: -20px;
+    font-size: 16px;
   }
 
   .positionCard svg {

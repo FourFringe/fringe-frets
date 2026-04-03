@@ -135,8 +135,8 @@ export function FretboardDots({
                 y={cy}
                 textAnchor="middle"
                 dominantBaseline="central"
-                fontSize={isRoot ? 11 : 10}
-                fontWeight={isRoot ? 700 : 500}
+                fontSize={isRoot ? 14 : 13}
+                fontWeight={isRoot ? 700 : 600}
                 fill="white"
                 style={{ pointerEvents: 'none', userSelect: 'none' }}
               >

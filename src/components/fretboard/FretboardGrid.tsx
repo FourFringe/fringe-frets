@@ -65,7 +65,7 @@ export function FretboardGrid({
           y1={topY}
           x2={x}
           y2={bottomY}
-          stroke="var(--fb-fret, #555)"
+          stroke="var(--fb-fret, #888)"
           strokeWidth={FRET_WIDTH}
         />,
       );
@@ -82,7 +82,7 @@ export function FretboardGrid({
           y1={y}
           x2={rightEdge}
           y2={y}
-          stroke="var(--fb-string, #aaa)"
+          stroke="var(--fb-string, #888)"
           strokeWidth={STRING_WIDTH}
         />,
       );
@@ -144,7 +144,7 @@ export function FretboardGrid({
           y1={y}
           x2={rightX}
           y2={y}
-          stroke="var(--fb-fret, #555)"
+          stroke="var(--fb-fret, #888)"
           strokeWidth={FRET_WIDTH}
         />,
       );
@@ -161,7 +161,7 @@ export function FretboardGrid({
           y1={fretY(0)}
           x2={x}
           y2={bottomEdge}
-          stroke="var(--fb-string, #aaa)"
+          stroke="var(--fb-string, #888)"
           strokeWidth={STRING_WIDTH}
         />,
       );

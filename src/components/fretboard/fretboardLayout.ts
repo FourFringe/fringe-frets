@@ -15,7 +15,7 @@
  */
 
 /** Pixel gap between adjacent strings. */
-export const STRING_SPACING = 24;
+export const STRING_SPACING = 32;
 
 /** Pixel gap between adjacent frets. */
 export const FRET_SPACING = 56;
@@ -33,19 +33,19 @@ export const BOTTOM_MARGIN = 16;
 export const RIGHT_MARGIN = 16;
 
 /** Radius of a highlighted note dot. */
-export const DOT_RADIUS = 9;
+export const DOT_RADIUS = 13;
 
 /** Radius of a root-note dot (slightly larger). */
-export const ROOT_DOT_RADIUS = 10;
+export const ROOT_DOT_RADIUS = 14;
 
 /** Width of the nut (fret-0 bar). */
-export const NUT_WIDTH = 4;
+export const NUT_WIDTH = 5;
 
 /** Fret wire width. */
-export const FRET_WIDTH = 1.5;
+export const FRET_WIDTH = 2.5;
 
 /** String wire width. */
-export const STRING_WIDTH = 1;
+export const STRING_WIDTH = 2;
 
 /**
  * X coordinate shared by string-name labels and open-string dot indicators.
@@ -102,11 +102,11 @@ export function stringY(stringIndex: number, stringCount: number): number {
 
 /** Left margin in vertical orientation — room for fret-number labels.
  * Must be large enough that labels at (VERT_LEFT_MARGIN - VERT_LABEL_INSET)
- * clear the string-0 dot circle (radius ROOT_DOT_RADIUS = 10). */
-export const VERT_LEFT_MARGIN = 52;
+ * clear the string-0 dot circle (radius ROOT_DOT_RADIUS = 14). */
+export const VERT_LEFT_MARGIN = 56;
 
 /** Horizontal distance from VERT_LEFT_MARGIN to the right edge of fret-number text. */
-export const VERT_LABEL_INSET = 14;
+export const VERT_LABEL_INSET = 16;
 
 /**
  * Y coordinate for string-name labels above the nut in vertical orientation.

@@ -19,4 +19,29 @@ body,
     background: white;
     color: black;
   }
+
+  /* ── Fretboard SVG print overrides ──────────────────────────────────── */
+
+  /* Larger, bolder, darker fret number and string name labels for print */
+  svg [data-testid="fretboard-labels"] text {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    fill: #222 !important;
+  }
+
+  /* Larger note labels inside dots for print */
+  svg [data-testid="fretboard-dots"] text {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Darken fret wires and strings for print on white paper */
+  svg[data-testid="fretboard-diagram"] line {
+    stroke: #333 !important;
+  }
+
+  /* Darken the nut bar for print */
+  svg[data-testid="fretboard-diagram"] rect {
+    fill: #333 !important;
+  }
 }

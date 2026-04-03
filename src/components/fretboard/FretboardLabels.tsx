@@ -47,7 +47,7 @@ export function FretboardLabels({ tuning, fretCount, startFret, orientation = 'h
           y={stringY(i, stringCount)}
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize={12}
+          fontSize={14}
           fontWeight={600}
           fill="var(--fb-label, #aaa)"
         >
@@ -67,9 +67,10 @@ export function FretboardLabels({ tuning, fretCount, startFret, orientation = 'h
           <text
             key={`fret-label-${i}`}
             x={cx}
-            y={stringY(stringCount - 1, stringCount) - 12}
+            y={stringY(stringCount - 1, stringCount) - 14}
             textAnchor="middle"
-            fontSize={10}
+            fontSize={12}
+            fontWeight={600}
             fill="var(--fb-label, #888)"
           >
             {absoluteFret}
@@ -84,9 +85,10 @@ export function FretboardLabels({ tuning, fretCount, startFret, orientation = 'h
         <text
           key="fret-label-0"
           x={fretCenterX(0)}
-          y={stringY(stringCount - 1, stringCount) - 12}
+          y={stringY(stringCount - 1, stringCount) - 14}
           textAnchor="middle"
-          fontSize={10}
+          fontSize={12}
+          fontWeight={600}
           fill="var(--fb-label, #888)"
         >
           0
@@ -104,9 +106,9 @@ export function FretboardLabels({ tuning, fretCount, startFret, orientation = 'h
           y={STRING_LABEL_TOP_Y}
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize={12}
-          fontWeight={600}
-          fill="var(--fb-label, #aaa)"
+          fontSize={14}
+          fontWeight={700}
+          fill="var(--fb-label, #ccc)"
         >
           {pc}
         </text>,
@@ -122,12 +124,13 @@ export function FretboardLabels({ tuning, fretCount, startFret, orientation = 'h
         elements.push(
           <text
             key={`fret-label-${i}`}
-            x={VERT_LEFT_MARGIN - VERT_LABEL_INSET}
+            x={VERT_LEFT_MARGIN - VERT_LABEL_INSET - 4}
             y={cy}
             textAnchor="end"
             dominantBaseline="central"
-            fontSize={10}
-            fill="var(--fb-label, #888)"
+            fontSize={14}
+            fontWeight={700}
+            fill="var(--fb-label, #ccc)"
           >
             {absoluteFret}
           </text>,
@@ -140,12 +143,13 @@ export function FretboardLabels({ tuning, fretCount, startFret, orientation = 'h
       elements.push(
         <text
           key="fret-label-0"
-          x={VERT_LEFT_MARGIN - VERT_LABEL_INSET}
+          x={VERT_LEFT_MARGIN - VERT_LABEL_INSET - 4}
           y={fretCenterY(0)}
           textAnchor="end"
           dominantBaseline="central"
-          fontSize={10}
-          fill="var(--fb-label, #888)"
+          fontSize={14}
+          fontWeight={700}
+          fill="var(--fb-label, #ccc)"
         >
           0
         </text>,
