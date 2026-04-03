@@ -87,6 +87,16 @@ export function AppShell({ settings, onUpdateSettings }: AppShellProps) {
           >
             Mode Chords
           </NavLink>
+
+          <div className={styles.navSection}>Practice</div>
+          <NavLink
+            to="/scale-positions"
+            className={({ isActive }) =>
+              `${styles.navLink} ${styles.navLinkIndent} ${isActive ? styles.navLinkActive : ''}`
+            }
+          >
+            Scale Positions
+          </NavLink>
         </div>
 
         <hr className={styles.sidebarDivider} />

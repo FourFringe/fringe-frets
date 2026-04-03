@@ -1,0 +1,78 @@
+/* ── Screen styles ───────────────────────────────────────────────────────── */
+
+.positionsGrid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  align-items: flex-start;
+  padding-bottom: 12px;
+}
+
+.positionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.positionLabel {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.printContent {
+  margin-top: calc(var(--mantine-spacing-xl) * 2);
+}
+
+/* ── Print styles ────────────────────────────────────────────────────────── */
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 1cm;
+  }
+
+  .printHide {
+    display: none !important;
+  }
+
+  .printContent {
+    width: 100%;
+    margin-top: 0;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .printContent h3 {
+    text-align: center;
+  }
+
+  .printContent > p {
+    text-align: center;
+  }
+
+  .pageTitle {
+    margin-bottom: 0.4cm;
+  }
+
+  .positionsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 6px;
+    overflow: visible;
+    padding-bottom: 0;
+    align-items: start;
+  }
+
+  .positionCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .positionCard svg {
+    display: block;
+    width: 100% !important;
+    height: 14cm !important;
+  }
+}

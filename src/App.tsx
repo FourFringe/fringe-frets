@@ -6,6 +6,7 @@ import { ScaleExplorer } from './pages/ScaleExplorer/ScaleExplorer';
 import { ScaleModes } from './pages/ScaleModes/ScaleModes';
 import { ModeChords } from './pages/ModeChords/ModeChords';
 import { ChordExplorer } from './pages/ChordBuilder/ChordBuilder';
+import { ScalePositions } from './pages/ScalePositions/ScalePositions';
 import { TabViewer } from './pages/TabViewer/TabViewer';
 import { useSettings } from './hooks/useSettings';
 import { useInstrument } from './hooks/useInstrument';
@@ -84,6 +85,14 @@ export default function App() {
                 tuning={settings.tuning ?? instrument.defaultTuning}
                 fretCount={settings.fretCount}
                 instrumentId={settings.instrumentId}
+              />
+            }
+          />
+          <Route
+            path="scale-positions"
+            element={
+              <ScalePositions
+                tuning={settings.tuning ?? instrument.defaultTuning}
               />
             }
           />
